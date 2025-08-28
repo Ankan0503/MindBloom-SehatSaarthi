@@ -1,0 +1,375 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Admin Portal</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css\sehat_css\admin.css' %}">
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h2><i class="fas fa-user-md"></i> Doctor Admin Portal</h2>
+            <p>Add new doctors to the database</p>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <form id="doctorForm">
+            <div class="mb-3">
+                <label for="doctorName" class="form-label">
+                    <i class="fas fa-user"></i> Doctor Name
+                </label>
+                <input type="text" class="form-control" id="doctorName" name="name" required 
+                       placeholder="Enter doctor's full name">
+            </div>
+
+            <div class="mb-3">
+                <label for="specialist" class="form-label">
+                    <i class="fas fa-stethoscope"></i> Specialist
+                </label>
+                <select class="form-control" id="specialist" name="specialist" required>
+                    <option value="">Select Specialist</option>
+                    <option value="General Physician">General Physician</option>
+                    <option value="Pediatrician">Pediatrician</option>
+                    <option value="Cardiologist">Cardiologist</option>
+                    <option value="Dermatologist">Dermatologist</option>
+                    <option value="Neurologist">Neurologist</option>
+                    <option value="Gastroenterologist">Gastroenterologist</option>
+                    <option value="Oncologist">Oncologist</option>
+                    <option value="Endocrinologist">Endocrinologist</option>
+                    <option value="Immunologist">Immunologist</option>
+                    <option value="Gynecologist">Gynecologist</option>
+                    <option value="Ophthalmologist">Ophthalmologist</option>
+                    <option value="Hematologist">Hematologist</option>
+                    <option value="Internal Medicine">Internal Medicine</option>
+                    <option value="Orthopedic Surgeon">Orthopedic Surgeon</option>
+                    <option value="Pulmonologist">Pulmonologist</option>
+                    <option value="Rheumatologist">Rheumatologist</option>
+                    <option value="Psychiatrist">Psychiatrist</option>
+                    <option value="Urologist">Urologist</option>
+                    <option value="Nephrologist">Nephrologist</option>
+                    <option value="Dentist">Dentist</option>
+                    <option value="Plastic Surgeon">Plastic Surgeon</option>
+                    <option value="Radiologist">Radiologist</option>
+                    <option value="Pathologist">Pathologist</option>
+                    <option value="Anesthesiologist">Anesthesiologist</option>
+                    <option value="Dietitian">Dietitian</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label for="fees" class="form-label">
+                    <i class="fas fa-rupee-sign"></i> Consultation Fees
+                </label>
+                <input type="number" class="form-control" id="fees" name="fees" required 
+                       placeholder="Enter consultation fees" min="0" step="0.01">
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-save">
+                    <i class="fas fa-save"></i> Save Doctor
+                </button>
+            </div>
+            <div class="text-center mt-3">
+                <a href="{% url 'sehatsaarthi'%}" class="btn-home">
+                    <i class="fas fa-home"></i> Return to Home
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('doctorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('doctorName').value,
+                specialist: document.getElementById('specialist').value,
+                fees: document.getElementById('fees').value
+            };
+            
+            // Show loading state
+            const submitBtn = document.querySelector('.btn-save');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            submitBtn.disabled = true;
+            
+            fetch('/api/save-doctor/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                const alertContainer = document.getElementById('alertContainer');
+                
+                if (data.success) {
+                    alertContainer.innerHTML = `
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle"></i> ${data.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `;
+                    // Reset form
+                    document.getElementById('doctorForm').reset();
+                } else {
+                    alertContainer.innerHTML = `
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle"></i> ${data.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                document.getElementById('alertContainer').innerHTML = `
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle"></i> Error: ${error.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+            })
+            .finally(() => {
+                // Restore button state
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+<!-- STEP 9: Update your existing HTML file -->
+<!-- Add this JavaScript code to your existing HTML file where you have the doctor specialty cards -->
+
+<script>
+// Add this JavaScript to your existing HTML file
+
+// Function to call when specialist card is clicked
+function selectSpecialty(specialist) {
+    console.log('Selected specialty:', specialist);
+    
+    // Show loading indicator (optional)
+    showLoadingModal();
+    
+    // Fetch doctors from backend
+    fetch(`/api/doctors/${encodeURIComponent(specialist)}/`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Received data:', data);
+            
+            // Hide loading modal
+            hideLoadingModal();
+            
+            if (data.success && data.doctors.length > 0) {
+                showDoctorModal(specialist, data.doctors);
+            } else {
+                showNoDoctorsMessage(specialist);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching doctors:', error);
+            hideLoadingModal();
+            showErrorMessage();
+        });
+}
+
+// Function to show loading modal (optional)
+function showLoadingModal() {
+    const loadingHTML = `
+        <div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static">
+            <div class="modal-dialog modal-sm modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-body text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading doctors...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', loadingHTML);
+    const modal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    modal.show();
+}
+
+function hideLoadingModal() {
+    const loadingModal = document.getElementById('loadingModal');
+    if (loadingModal) {
+        const modal = bootstrap.Modal.getInstance(loadingModal);
+        if (modal) {
+            modal.hide();
+            loadingModal.addEventListener('hidden.bs.modal', function () {
+                loadingModal.remove();
+            });
+        }
+    }
+}
+
+// Function to show modal/popup with doctors list
+function showDoctorModal(specialist, doctors) {
+    // Create modal HTML
+    let modalHTML = `
+        <div class="modal fade" id="doctorModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-user-md"></i> ${specialist} Doctors
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+    `;
+    
+    doctors.forEach(doctor => {
+        modalHTML += `
+            <div class="col-md-6 mb-3">
+                <div class="card doctor-card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <h6 class="card-title">
+                            <i class="fas fa-user-doctor text-primary"></i> 
+                            Dr. ${doctor.name}
+                        </h6>
+                        <p class="card-text flex-grow-1">
+                            <small class="text-muted">
+                                <i class="fas fa-stethoscope"></i> ${doctor.specialist}
+                            </small><br>
+                            <span class="fs-5 fw-bold text-success">₹${doctor.fees}</span>
+                            <small class="text-muted">consultation fee</small>
+                        </p>
+                        <div class="mt-auto">
+                            <button class="btn btn-primary btn-sm w-100" onclick="bookAppointment(${doctor.id}, '${doctor.name}')">
+                                <i class="fas fa-calendar-check"></i> Book Appointment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    modalHTML += `
+                        </div>
+                        <div class="text-center mt-3">
+                            <small class="text-muted">Found ${doctors.length} doctor(s) for ${specialist}</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i> Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if any
+    const existingModal = document.getElementById('doctorModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('doctorModal'));
+    modal.show();
+    
+    // Clean up modal after it's hidden
+    document.getElementById('doctorModal').addEventListener('hidden.bs.modal', function () {
+        this.remove();
+    });
+}
+
+// Function to handle appointment booking (customize as needed)
+function bookAppointment(doctorId, doctorName) {
+    alert(`Booking appointment with Dr. ${doctorName} (ID: ${doctorId})`);
+    // Add your booking logic here
+    // You can call another API endpoint or redirect to booking page
+}
+
+function showNoDoctorsMessage(specialist) {
+    const modalHTML = `
+        <div class="modal fade" id="noDoctorsModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title">
+                            <i class="fas fa-exclamation-triangle"></i> No Doctors Found
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <i class="fas fa-user-md fa-3x text-muted mb-3"></i>
+                        <p>No doctors available for <strong>${specialist}</strong> at the moment.</p>
+                        <p class="text-muted">Please check back later or contact our support team.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    const modal = new bootstrap.Modal(document.getElementById('noDoctorsModal'));
+    modal.show();
+    
+    document.getElementById('noDoctorsModal').addEventListener('hidden.bs.modal', function () {
+        this.remove();
+    });
+}
+
+function showErrorMessage() {
+    const modalHTML = `
+        <div class="modal fade" id="errorModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-exclamation-circle"></i> Error
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <i class="fas fa-wifi fa-3x text-muted mb-3"></i>
+                        <p>Error loading doctors. Please check your internet connection and try again.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+    modal.show();
+    
+    document.getElementById('errorModal').addEventListener('hidden.bs.modal', function () {
+        this.remove();
+    });
+}
+</script>
