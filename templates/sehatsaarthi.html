@@ -14,20 +14,22 @@
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
-    <link rel="stylesheet" href="{% static 'css\sehat_css\navbar.css' %}">
-    <link rel="stylesheet" href="{% static 'css\sehat_css\hero.css' %}">
-    <link rel="stylesheet" href="{% static 'css\sehat_css\feature.css' %}">
-    <link rel="stylesheet" href="{% static 'css\sehat_css\hospitals.css' %}">
-    <link rel="stylesheet" href="{% static 'css\sehat_css\book_doctor.css' %}">
-    <link rel="stylesheet" href="{% static 'css\sehat_css\footer.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sehat_css/navbar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sehat_css/hero.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sehat_css/feature.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sehat_css/hospitals.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sehat_css/book_doctor.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sehat_css/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sehat_css/chatbot.css' %}">
     
+    <link rel="icon" href="{% static 'images/sehat_img/sehatsaarthi_favicon.ico' %}" type="image/x-icon">
 </head>
 <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <nav class="navbar">
         <div class="logo">
             <!-- Using a placeholder for logo -->
-            <img src="{% static 'images\sehat_img\logo.png'%}" alt="SehatSaarthi Logo">
+            <img src="{% static 'images/sehat_img/logo.png'%}" alt="SehatSaarthi Logo">
             <span class="header-logo-text">SehatSaarthi</span>
         </div>
 
@@ -71,7 +73,7 @@
         <button class="hamburger" id="hamburgerBtn">
             <i class="fas fa-bars"></i>
         </button>
-        <script src="{% static "js\sehat_js\navbar.js" %}"></script>
+        <script src="{% static "js/sehat_js/navbar.js" %}"></script>
     </nav>
 
     <!-- Hero Section (Full Screen) -->
@@ -90,7 +92,7 @@
             </div>
         </div>
         <div class="hero-image">
-            <img src="{% static "images\sehat_img\docimage.png" %}" alt="Healthcare Illustration">
+            <img src="{% static "images/sehat_img/docimage.png" %}" alt="Healthcare Illustration">
         </div>
     </section>
 
@@ -194,10 +196,14 @@
         </script>
         <!-- Leaflet JS -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-        <script src="{%static "js\sehat_js\map.js" %}"></script>
+        <script src="{%static "js/sehat_js/map.js" %}"></script>
     </section>
 
-    <script src="{%static "chatbot.js" %}"></script>
+    <!-- Chatbot Section -->
+     <section>
+        <script src="{%static "js/sehat_js/chatbot.js" %}"></script>
+     </section>
+
 
 
 <!-- Book a Doctor Section -->
@@ -382,7 +388,7 @@
                 </div>
             </div>
         </div>
-        <script src="{% static "js\sehat_js\book_doctor.js" %}"></script>
+        <script src="{% static "js/sehat_js/book_doctor.js" %}"></script>
     </section>
         <!-- Footer -->
     <footer class="footer">
@@ -392,7 +398,7 @@
                 <!-- Company Info -->
                 <div class="footer-section">
                     <div class="logo">
-                        <img src="{% static "images\sehat_img\logo.png" %}"alt="SehatSaarthi Logo">
+                        <img src="{% static "images/sehat_img/logo.png" %}"alt="SehatSaarthi Logo">
                         <span class="footer-logo-text">SehatSaarthi</span>
                     </div>
                     <p class="footer-description">
@@ -460,7 +466,7 @@
                 <p>&copy; 2025 SehatSaarthi. All rights reserved.</p>
             </div>
         </div>
-        <script src="{% static "js\sehat_js\footer.js" %}"></script>
+        <script src="{% static "js/sehat_js/footer.js" %}"></script>
     </footer>
 </body>
 

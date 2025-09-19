@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.utils.decorators import method_decorator
 from django.views.generic import View
 import logging
+from django.conf import settings
 
 # Set up logging for security monitoring
 logger = logging.getLogger(__name__)
@@ -183,7 +184,9 @@ def unauthorized_view(request):
 
 
 def mental_health_view(request):
-    return render(request, 'mindbloom.html')
+    return render(request, 'mindbloom.html', {
+        "STATIC_URL": settings.STATIC_URL
+    })
 
 def other_services_view(request):
     return render(request, 'other_services.html')

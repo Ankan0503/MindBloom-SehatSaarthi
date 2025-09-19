@@ -5,14 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MindBloom - Your Mental Health Matters</title>
-    <link rel="stylesheet" href="{% static 'css\mind_css\mental_health.css'%}">
-    <link rel="stylesheet" href="{% static 'css\mind_css\navbar.css'%}">
-    <link rel="stylesheet" href="{% static 'css\mind_css\hero.css'%}">
-    <link rel="stylesheet" href="{% static 'css\mind_css\stats_feature_quote.css'%}">
-    <link rel="stylesheet" href="{% static 'css\mind_css\quiz.css'%}">
-    <link rel="stylesheet" href="{% static 'css\mind_css\yoga_medi.css'%}">
-    <link rel="stylesheet" href="{% static 'css\mind_css\habits.css'%}">
-    <link rel="stylesheet" href="{% static 'css\mind_css\cta_footer.css'%}">
+    <link rel="stylesheet" href="{% static 'css/mind_css/navbar.css'%}">
+    <link rel="stylesheet" href="{% static 'css/mind_css/hero.css'%}">
+    <link rel="stylesheet" href="{% static 'css/mind_css/stats_feature_quote.css'%}">
+    <link rel="stylesheet" href="{% static 'css/mind_css/quiz.css'%}">
+    <link rel="stylesheet" href="{% static 'css/mind_css/yoga_medi.css'%}">
+    <link rel="stylesheet" href="{% static 'css/mind_css/habits.css'%}">
+    <link rel="stylesheet" href="{% static 'css/mind_css/cta_footer.css'%}">
+
+    <link rel="icon" href="{% static 'images/mind_img/mindbloom_favicon.ico' %}" type="image/x-icon">
 </head>
 <body>
     <!-- Navigation -->
@@ -164,7 +165,7 @@
                 <div id="resultContent"></div>
             </div>
         </div>
-        <script src="{% static 'js\mind_js\quiz.js'%}"></script>
+        <script src="{% static 'js/mind_js/quiz.js'%}"></script>
     </section>
     <!--<div class="b">-->
     <!--    <button class="btn"><a href="https://glittering-pavlova-8e98e1.netlify.app/" style="color: white; text-decoration: none">Analyse Text</a></button>-->
@@ -256,9 +257,9 @@
             </div>
         </div>
         <script>
-            const STATIC_URL = "{% static '' %}";
+            const STATIC_URL = "{{ STATIC_URL }}";
         </script>
-        <script src="{% static 'js\mind_js\yoga_medi.js'%}"></script>
+        <script src="{% static 'js/mind_js/yoga_medi.js'%}"></script>
     </section>
 
 <!-- Centers Section -->
@@ -343,7 +344,7 @@
                 </div>
             </div>
         </div>
-        <script src="{% static 'js\mind_js\habit.js'%}"></script>
+        <script src="{% static 'js/mind_js/habit.js'%}"></script>
     </section>
 
 <!-- CTA Section -->
@@ -387,6 +388,6 @@
         </div>
     </div>
 </footer>
-<script src="{% static "js\mind_js\animate_quote.js" %}"></script>
+<script src="{% static "js/mind_js/animate_quote.js" %}"></script>
 </body>
 </html>
