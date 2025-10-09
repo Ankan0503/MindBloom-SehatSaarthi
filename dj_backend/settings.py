@@ -144,8 +144,10 @@ STATICFILES_DIRS = [
 ]
 
 STATIC_ROOT = BASE_DIR / 'staticfiles' # For production
-GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH',)
-GEOS_LIBRARY_PATH = os.getenv('GEOS_LIBRARY_PATH',)
+
+if os.name == 'nt':
+    GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH',)
+    GEOS_LIBRARY_PATH = os.getenv('GEOS_LIBRARY_PATH',)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
