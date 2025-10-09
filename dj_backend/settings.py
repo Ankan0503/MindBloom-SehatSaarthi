@@ -45,6 +45,9 @@ INSTALLED_APPS = [
     'signup.apps.SignupConfig',
     'hospital.apps.HospitalConfig',
     'doctors.apps.DoctorsConfig',
+    'assessment.apps.AssessmentConfig',
+    'django.contrib.gis',
+    'stressmap.apps.StressmapConfig',
 ]
 
 MIDDLEWARE = [
@@ -90,15 +93,16 @@ WSGI_APPLICATION = 'dj_backend.wsgi.application'
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": 'django.contrib.gis.db.backends.postgis',
         "NAME": os.getenv('DATABASE_NAME'),
         "USER": os.getenv('DATABASE_USER'),
         "PASSWORD": os.getenv('DATABASE_PASSWORD'),
         "HOST": os.getenv('DATABASE_HOST'),
         "PORT": os.getenv('DATABASE_PORT'),
-    }
+    },
 }
 
+# DATABASE_ROUTERS = ['dj_backend.routers.GISRouter']
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -140,6 +144,8 @@ STATICFILES_DIRS = [
 ]
 
 STATIC_ROOT = BASE_DIR / 'staticfiles' # For production
+GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH',)
+GEOS_LIBRARY_PATH = os.getenv('GEOS_LIBRARY_PATH',)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

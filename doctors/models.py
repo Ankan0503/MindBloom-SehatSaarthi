@@ -10,4 +10,5 @@ class Doctor(models.Model):
         return f"Dr. {self.name} - {self.specialist}"
     
     class Meta:
+        app_label = 'doctors'
         ordering = ['name']

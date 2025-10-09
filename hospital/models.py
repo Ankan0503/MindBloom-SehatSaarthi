@@ -10,4 +10,5 @@ class Hospital(models.Model):
         return self.name
     
     class Meta:
+        app_label = 'hospital'
         ordering = ['name']

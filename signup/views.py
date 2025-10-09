@@ -187,6 +187,3 @@ def mental_health_view(request):
     return render(request, 'mindbloom.html', {
         "STATIC_URL": settings.STATIC_URL
     })
-
-def other_services_view(request):
-    return render(request, 'other_services.html')
