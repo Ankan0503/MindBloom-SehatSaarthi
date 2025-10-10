@@ -278,7 +278,7 @@ async function checkEligibility() {
         });
         
         const data = await response.json();
-        
+
         if (!data.can_submit) {
             showRateLimitMessage(data.days_remaining);
             return false;
@@ -511,7 +511,7 @@ async function submitAssessment(pincode, score, maxScore) {
     }
 }
 
-async function displayResults(totalScore, maxScore, submissionData) {
+async function displayResults(totalScore, maxScore, submissionData, days_rem) {
     pincodeSection.style.display = 'none';
     form.style.display = 'none';
     document.querySelector('.quiz-progress-container').style.display = 'none';
@@ -653,7 +653,7 @@ async function displayResults(totalScore, maxScore, submissionData) {
         
         <div style="margin-top: 30px; padding: 15px; background: #fef3c7; border-radius: 8px;">
             <p style="margin: 0; color: #78350f; font-size: 0.95em;">
-                <strong>⏰ Cooldown Period:</strong> You can retake this assessment in ${daysRemaining} days to track your progress.
+                <strong>⏰ Cooldown Period:</strong> You can retake this assessment in ${days_rem} days to track your progress.
                 This helps maintain data accuracy.
             </p>
         </div>
@@ -725,7 +725,7 @@ function addEventListeners() {
             
             if (submissionResult) {
                 console.log('Assessment submitted successfully:', submissionResult);
-                await displayResults(totalScore, maxScore, submissionResult);
+                await displayResults(totalScore, maxScore, submissionResult, submissionResult.days_remaining);
             } else {
                 throw new Error('Failed to submit assessment');
             }
