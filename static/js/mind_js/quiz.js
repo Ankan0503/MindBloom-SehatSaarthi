@@ -1,205 +1,65 @@
-const allQuestionsData = [
-    {
-        title: "How often do you feel relaxed during the day?",
-        options: [
-            { value: 10, text: "😎 Always relaxed and at peace" },
-            { value: 20, text: "😬 Sometimes feel tense" },
-            { value: 30, text: "😓 Frequently stressed" },
-            { value: 40, text: "😰 Almost always anxious" }
-        ]
-    },
-    {
-        title: "How would you describe your sleep quality?",
-        options: [
-            { value: 10, text: "😴 Peaceful and deep sleep" },
-            { value: 20, text: "🌙 Light disturbances occasionally" },
-            { value: 30, text: "🥱 Difficulty falling asleep" },
-            { value: 40, text: "😵 Hardly any proper sleep" }
-        ]
-    },
-    {
-        title: "How often do you worry about small issues?",
-        options: [
-            { value: 10, text: "🙂 Rarely worry about minor things" },
-            { value: 20, text: "🤔 Sometimes concerned" },
-            { value: 30, text: "😟 Frequently worried" },
-            { value: 40, text: "😫 Almost always anxious" }
-        ]
-    },
-    {
-        title: "How do you handle work or study pressure?",
-        options: [
-            { value: 10, text: "💪 Easily manageable" },
-            { value: 20, text: "😬 Sometimes stressful" },
-            { value: 30, text: "😓 Quite stressful" },
-            { value: 40, text: "😰 Extremely overwhelming" }
-        ]
-    },
-    {
-        title: "How often do you feel low on energy?",
-        options: [
-            { value: 10, text: "⚡ Almost never feel drained" },
-            { value: 20, text: "🔋 Sometimes tired" },
-            { value: 30, text: "😴 Often feel drained" },
-            { value: 40, text: "😵 Always exhausted" }
-        ]
-    },
-    {
-        title: "How do you react to unexpected problems?",
-        options: [
-            { value: 10, text: "😎 Stay calm and focused" },
-            { value: 20, text: "😬 Get a little nervous" },
-            { value: 30, text: "😟 Feel very stressed" },
-            { value: 40, text: "😱 Panic completely" }
-        ]
-    },
-    {
-        title: "How often do you feel positive about yourself?",
-        options: [
-            { value: 10, text: "🌟 Almost always confident" },
-            { value: 20, text: "🙂 Sometimes positive" },
-            { value: 30, text: "😔 Rarely feel good about myself" },
-            { value: 40, text: "😞 Almost never positive" }
-        ]
-    },
-    {
-        title: "How often do you experience headaches or body tension?",
-        options: [
-            { value: 10, text: "😌 Rarely experience physical symptoms" },
-            { value: 20, text: "🤕 Sometimes get headaches" },
-            { value: 30, text: "😖 Frequently tense or in pain" },
-            { value: 40, text: "😩 Almost daily physical symptoms" }
-        ]
-    },
-    {
-        title: "How often do you engage in hobbies or relaxation activities?",
-        options: [
-            { value: 10, text: "🎨 Regularly enjoy hobbies" },
-            { value: 20, text: "🎶 Sometimes find time to relax" },
-            { value: 30, text: "📉 Rarely have time for myself" },
-            { value: 40, text: "😔 Never have time for relaxation" }
-        ]
-    },
-    {
-        title: "How supported do you feel by friends and family?",
-        options: [
-            { value: 10, text: "❤️ Always feel supported and loved" },
-            { value: 20, text: "🤝 Sometimes feel supported" },
-            { value: 30, text: "😞 Rarely feel understood" },
-            { value: 40, text: "💔 Feel isolated and alone" }
-        ]
-    },
-    {
-        title: "How often do you take breaks during work/study?",
-        options: [
-            { value: 10, text: "⏰ Regular breaks throughout the day" },
-            { value: 20, text: "🕐 Occasional breaks" },
-            { value: 30, text: "🚫 Rarely take breaks" },
-            { value: 40, text: "❌ Never take breaks" }
-        ]
-    },
-    {
-        title: "How do you feel about your future?",
-        options: [
-            { value: 10, text: "🌟 Very optimistic and hopeful" },
-            { value: 20, text: "😊 Generally positive" },
-            { value: 30, text: "😐 Uncertain and worried" },
-            { value: 40, text: "😞 Pessimistic and hopeless" }
-        ]
-    },
-    {
-        title: "How often do you practice mindfulness or meditation?",
-        options: [
-            { value: 10, text: "🧘 Daily practice" },
-            { value: 20, text: "🌸 Few times a week" },
-            { value: 30, text: "🤔 Occasionally" },
-            { value: 40, text: "❌ Never practice" }
-        ]
-    },
-    {
-        title: "How do you handle conflicts with others?",
-        options: [
-            { value: 10, text: "🤝 Communicate calmly and resolve" },
-            { value: 20, text: "😬 Sometimes get defensive" },
-            { value: 30, text: "😡 Often get angry or upset" },
-            { value: 40, text: "😰 Avoid conflicts completely" }
-        ]
-    },
-    {
-        title: "How satisfied are you with your current lifestyle?",
-        options: [
-            { value: 10, text: "😍 Very satisfied and content" },
-            { value: 20, text: "🙂 Mostly satisfied" },
-            { value: 30, text: "😕 Somewhat dissatisfied" },
-            { value: 40, text: "😞 Very dissatisfied" }
-        ]
-    },
-    {
-        title: "How often do you feel overwhelmed by daily tasks?",
-        options: [
-            { value: 10, text: "✅ Rarely overwhelmed" },
-            { value: 20, text: "📋 Sometimes feel busy" },
-            { value: 30, text: "😵 Often overwhelmed" },
-            { value: 40, text: "🆘 Always drowning in tasks" }
-        ]
-    },
-    {
-        title: "How is your appetite and eating patterns?",
-        options: [
-            { value: 10, text: "🍽️ Healthy and regular eating" },
-            { value: 20, text: "🍕 Sometimes irregular" },
-            { value: 30, text: "🍪 Often stress eating or skipping" },
-            { value: 40, text: "❌ Severely disrupted eating" }
-        ]
-    },
-    {
-        title: "How often do you laugh or experience joy?",
-        options: [
-            { value: 10, text: "😄 Daily laughter and joy" },
-            { value: 20, text: "😊 Regular moments of happiness" },
-            { value: 30, text: "🙂 Occasional joy" },
-            { value: 40, text: "😐 Rarely feel joyful" }
-        ]
-    },
-    {
-        title: "How do you cope with stressful situations?",
-        options: [
-            { value: 10, text: "💪 Healthy coping strategies" },
-            { value: 20, text: "🤔 Mix of good and bad coping" },
-            { value: 30, text: "😟 Often use unhealthy coping" },
-            { value: 40, text: "🚫 No effective coping strategies" }
-        ]
-    },
-    {
-        title: "How connected do you feel to your community or social circle?",
-        options: [
-            { value: 10, text: "🤗 Very connected and engaged" },
-            { value: 20, text: "👥 Moderately connected" },
-            { value: 30, text: "😔 Somewhat isolated" },
-            { value: 40, text: "🏝️ Very isolated and lonely" }
-        ]
-    }
-];
+// Dynamic AI-Powered Mental Health Assessment
+// Compatible with existing HTML structure
 
-const QUESTIONS_TO_SHOW = 10;
-let selectedQuestions = [];
+// ============================================================================
+// CONFIGURATION - Adjust these to match your setup
+// ============================================================================
+const TOTAL_QUESTIONS = 10;
+const API_ENDPOINT = '/api/generate-question/';
+const SUBMIT_ENDPOINT = '/api/submit-assessment/';
+const ELIGIBILITY_ENDPOINT = '/api/check-eligibility/';
+const PINCODE_LOCATION_ENDPOINT = '/api/get-pincode-from-location/';
+
+// ============================================================================
+// STATE MANAGEMENT
+// ============================================================================
 let currentQuestion = 0;
-let totalQuestions = QUESTIONS_TO_SHOW;
+let conversationHistory = [];
 let answers = {};
 let userFingerprint = null;
 let detectedPincode = null;
 let locationPermissionGranted = false;
+let isGeneratingQuestion = false;
+let currentQuestionData = null;
 
-const questionsContainer = document.getElementById('questionsContainer');
-const prevBtn = document.getElementById('prevBtn');
-const nextBtn = document.getElementById('nextBtn');
-const progressFill = document.getElementById('quizProgressFill');
-const progressText = document.getElementById('quizProgressText');
-const resultDiv = document.getElementById('result');
-const form = document.getElementById('quizForm');
-const pincodeSection = document.getElementById('pincodeSection');
-const pincodeInput = document.getElementById('pincodeInput');
+// ============================================================================
+// DOM ELEMENTS - Will find these automatically
+// ============================================================================
+let questionsContainer, prevBtn, nextBtn, progressFill, progressText;
+let resultDiv, form, pincodeSection, pincodeInput, getResultBtn;
 
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
+function initializeDOMElements() {
+    questionsContainer = document.getElementById('questionsContainer');
+    prevBtn = document.getElementById('prevBtn');
+    nextBtn = document.getElementById('nextBtn');
+    progressFill = document.getElementById('quizProgressFill');
+    progressText = document.getElementById('quizProgressText');
+    resultDiv = document.getElementById('result');
+    form = document.getElementById('quizForm');
+    pincodeSection = document.getElementById('pincodeSection');
+    pincodeInput = document.getElementById('pincodeInput');
+    getResultBtn = document.getElementById('getResultBtn');
+    
+    // Verify all elements exist
+    const required = {
+        questionsContainer, prevBtn, nextBtn, progressFill, progressText,
+        resultDiv, form, pincodeSection, pincodeInput, getResultBtn
+    };
+    
+    for (let [name, element] of Object.entries(required)) {
+        if (!element) {
+            console.error(`❌ Required element not found: ${name}`);
+            console.log(`Please ensure your HTML has an element with id="${name}"`);
+        }
+    }
+}
+
+// ============================================================================
+// FINGERPRINT GENERATION (For rate limiting)
+// ============================================================================
 function generateFingerprint() {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -221,6 +81,9 @@ function generateFingerprint() {
     return btoa(JSON.stringify(fingerprint));
 }
 
+// ============================================================================
+// LOCATION DETECTION
+// ============================================================================
 async function requestLocation() {
     if (!navigator.geolocation) {
         console.log('Geolocation not supported');
@@ -234,46 +97,37 @@ async function requestLocation() {
                 const { latitude, longitude } = position.coords;
                 
                 try {
-                    const response = await fetch('/api/get-pincode-from-location/', {
+                    const response = await fetch(PINCODE_LOCATION_ENDPOINT, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ latitude, longitude })
                     });
                     
                     const data = await response.json();
-                    if (data.success && data.pincode) {
-                        resolve(data.pincode);
-                    } else {
-                        resolve(null);
-                    }
+                    resolve(data.success && data.pincode ? data.pincode : null);
                 } catch (error) {
-                    console.error('Error fetching pincode from location:', error);
+                    console.error('Error fetching pincode:', error);
                     resolve(null);
                 }
             },
             (error) => {
-                console.log('Location permission denied or error:', error.message);
+                console.log('Location permission denied:', error.message);
                 locationPermissionGranted = false;
                 resolve(null);
             },
-            {
-                timeout: 10000,
-                maximumAge: 0,
-                enableHighAccuracy: true
-            }
+            { timeout: 10000, maximumAge: 0, enableHighAccuracy: true }
         );
     });
 }
 
+// ============================================================================
+// ELIGIBILITY CHECK (Cooldown period)
+// ============================================================================
 async function checkEligibility() {
     try {
-        const response = await fetch('/api/check-eligibility/', {
+        const response = await fetch(ELIGIBILITY_ENDPOINT, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fingerprint: userFingerprint })
         });
         
@@ -287,215 +141,396 @@ async function checkEligibility() {
         return true;
     } catch (error) {
         console.error('Error checking eligibility:', error);
-        return true;
+        return true; // Allow on error
     }
 }
 
+// ============================================================================
+// RATE LIMIT MESSAGE
+// ============================================================================
 function showRateLimitMessage(daysRemaining) {
-    const container = document.querySelector('.quizzz');
+    const container = document.querySelector('.quizzz') || document.body;
     container.innerHTML = `
-        <div class="header">
+        <div class="header" style="text-align: center; padding: 20px;">
             <h1>⏳ Assessment Cooldown Active</h1>
             <p>Thank you for participating in our mental health survey!</p>
         </div>
 
-        <div class="result moderate show" style="max-width: 600px; margin: 40px auto;">
-            <div class="result-icon" style="font-size: 4rem;">⏰</div>
-            <h2 class="result-title">Please Wait ${daysRemaining} Day${daysRemaining > 1 ? 's' : ''}</h2>
-            <p class="result-description" style="margin: 20px 0;">
+        <div class="result moderate show" style="max-width: 600px; margin: 40px auto; padding: 30px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <div class="result-icon" style="font-size: 4rem; text-align: center;">⏰</div>
+            <h2 class="result-title" style="text-align: center; margin: 20px 0;">Please Wait ${daysRemaining} Day${daysRemaining > 1 ? 's' : ''}</h2>
+            <p class="result-description" style="margin: 20px 0; text-align: center; line-height: 1.6;">
                 You have already completed this assessment recently. 
                 To maintain data integrity and prevent duplicate responses, 
                 you can retake the assessment in <strong>${daysRemaining} day(s)</strong>.
             </p>
 
             <div style="background: #f0f9ff; padding: 20px; border-radius: 10px; margin: 20px 0;">
-                <p style="margin: 0; color: #0369a1;">
+                <p style="margin: 0; color: #0369a1; text-align: center;">
                     <strong>Why the cooldown?</strong><br>
                     This helps us maintain accurate mental health statistics for your area 
                     and prevents gaming the system. Your honest participation matters!
                 </p>
             </div>
 
-            <div class="cooldown-buttons">
-                <button class="btn btn-secondary" onclick="location.href='/'">🏠 Back to Home</button>
-                <button class="btn btn-primary" onclick="location.href=mapUrl">🗺️ View Stress Map</button>
+            <div style="display: flex; justify-content: center; gap: 20px; margin-top: 30px; flex-wrap: wrap;">
+                <button onclick="location.href='/'" style="padding: 12px 25px; background: #f8f9fa; color: #333; border: 2px solid #667eea; border-radius: 16px; cursor: pointer; font-weight: 600;">
+                    🏠 Back to Home
+                </button>
+                <button onclick="location.href='/map'" style="padding: 12px 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 16px; cursor: pointer; font-weight: 600;">
+                    🗺️ View Stress Map
+                </button>
             </div>
         </div>
+    `;
+}
 
+// ============================================================================
+// AI QUESTION GENERATION
+// ============================================================================
+async function generateNextQuestion() {
+    if (isGeneratingQuestion) {
+        console.log('Already generating question...');
+        return null;
+    }
+    
+    isGeneratingQuestion = true;
+    showLoadingIndicator();
+    
+    try {
+        console.log(`🤖 Requesting AI question ${currentQuestion + 1}/${TOTAL_QUESTIONS}`);
+        
+        const response = await fetch(API_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                conversation_history: conversationHistory,
+                question_number: currentQuestion + 1,
+                total_questions: TOTAL_QUESTIONS
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API returned ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to generate question');
+        }
+        
+        console.log(`✅ AI question generated: "${data.question}"`);
+        
+        hideLoadingIndicator();
+        isGeneratingQuestion = false;
+        
+        return {
+            id: `ai_q_${currentQuestion + 1}`,
+            question: data.question,
+            type: data.type || 'scale',
+            options: data.options || generateDefaultOptions(),
+            follow_up_areas: data.follow_up_areas || []
+        };
+    } catch (error) {
+        console.error('❌ Error generating AI question:', error);
+        hideLoadingIndicator();
+        isGeneratingQuestion = false;
+        
+        // Show user-friendly error and use fallback
+        showTemporaryMessage('Using backup question...', 2000);
+        return generateFallbackQuestion();
+    }
+}
+
+// ============================================================================
+// FALLBACK QUESTIONS (if AI fails)
+// ============================================================================
+function generateFallbackQuestion() {
+    const fallbacks = [
+        {
+            question: "How are you feeling today overall?",
+            options: [
+                { value: 10, text: "😊 Great, feeling positive and energized" },
+                { value: 20, text: "😌 Okay, managing well enough" },
+                { value: 30, text: "😕 Not great, feeling stressed or down" },
+                { value: 40, text: "😔 Really struggling today" }
+            ]
+        },
+        {
+            question: "How would you describe your stress levels lately?",
+            options: [
+                { value: 10, text: "😎 Low stress, feeling relaxed" },
+                { value: 20, text: "😌 Moderate, manageable stress" },
+                { value: 30, text: "😟 High stress, struggling to cope" },
+                { value: 40, text: "😰 Overwhelming, constant stress" }
+            ]
+        },
+        {
+            question: "How has your sleep been recently?",
+            options: [
+                { value: 10, text: "😴 Sleeping well, feeling rested" },
+                { value: 20, text: "🌙 Some issues but mostly okay" },
+                { value: 30, text: "😓 Poor sleep, often tired" },
+                { value: 40, text: "😵 Barely sleeping, exhausted" }
+            ]
+        }
+    ];
+    
+    const index = currentQuestion % fallbacks.length;
+    const fallback = fallbacks[index];
+    
+    console.log(`⚠️ Using fallback question ${currentQuestion + 1}`);
+    
+    return {
+        id: `fallback_q_${currentQuestion + 1}`,
+        question: fallback.question,
+        type: 'scale',
+        options: fallback.options,
+        follow_up_areas: []
+    };
+}
+
+function generateDefaultOptions() {
+    return [
+        { value: 10, text: "😊 Not at all / Rarely" },
+        { value: 20, text: "😌 Sometimes / Occasionally" },
+        { value: 30, text: "😕 Frequently / Often" },
+        { value: 40, text: "😔 Almost always / Constantly" }
+    ];
+}
+
+// ============================================================================
+// LOADING INDICATOR
+// ============================================================================
+function showLoadingIndicator() {
+    if (!questionsContainer) return;
+    
+    questionsContainer.innerHTML = `
+        <div class="loading-indicator" style="text-align: center; padding: 60px 20px;">
+            <div class="spinner" style="
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #667eea;
+                border-radius: 50%;
+                width: 60px;
+                height: 60px;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 20px;
+            "></div>
+            <p style="color: #667eea; font-size: 1.1em; margin: 10px 0;">
+                🤔 Analyzing your responses...
+            </p>
+            <p style="color: #999; font-size: 0.9em;">
+                Generating personalized question
+            </p>
+        </div>
         <style>
-            .cooldown-buttons {
-                display: flex;
-                justify-content: center;
-                gap: 20px;
-                margin-top: 30px;
-                flex-wrap: wrap;
-            }
-
-            .cooldown-buttons .btn {
-                min-width: 160px;
-                padding: 12px 25px;
-                font-size: 1rem;
-                border-radius: 16px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                border: none;
-            }
-
-            .cooldown-buttons .btn-primary {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-            }
-
-            .cooldown-buttons .btn-primary:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-            }
-
-            .cooldown-buttons .btn-secondary {
-                background: #f8f9fa;
-                color: #333;
-                border: 2px solid #667eea;
-            }
-
-            .cooldown-buttons .btn-secondary:hover {
-                background: #667eea;
-                color: white;
-                transform: translateY(-2px);
-                box-shadow: 0 6px 18px rgba(102, 126, 234, 0.3);
-            }
-
-            @media (max-width: 600px) {
-                .cooldown-buttons {
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 15px;
-                }
-
-                .cooldown-buttons .btn {
-                    width: 90%;
-                    font-size: 0.95rem;
-                }
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
             }
         </style>
     `;
 }
 
-
-
-function selectRandomQuestions() {
-    const shuffled = [...allQuestionsData].sort(() => 0.5 - Math.random());
-    selectedQuestions = shuffled.slice(0, QUESTIONS_TO_SHOW);
+function hideLoadingIndicator() {
+    const loader = questionsContainer?.querySelector('.loading-indicator');
+    if (loader) loader.remove();
 }
 
-function generateQuestions() {
+function showTemporaryMessage(message, duration = 3000) {
+    const msgDiv = document.createElement('div');
+    msgDiv.style.cssText = `
+        position: fixed; top: 20px; right: 20px; 
+        background: #667eea; color: white; 
+        padding: 15px 20px; border-radius: 8px; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        z-index: 10000; animation: slideIn 0.3s ease;
+    `;
+    msgDiv.textContent = message;
+    document.body.appendChild(msgDiv);
+    
+    setTimeout(() => {
+        msgDiv.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => msgDiv.remove(), 300);
+    }, duration);
+}
+
+// ============================================================================
+// DISPLAY QUESTION
+// ============================================================================
+async function displayQuestion(questionData = null) {
+    // Generate question if not provided
+    if (!questionData) {
+        questionData = await generateNextQuestion();
+    }
+    
+    if (!questionData) {
+        console.error('Failed to get question data');
+        return;
+    }
+    
+    currentQuestionData = questionData;
+    
+    // Clear container
     questionsContainer.innerHTML = '';
-
-    selectedQuestions.forEach((question, index) => {
-        const questionDiv = document.createElement('div');
-        questionDiv.className = 'question-slide';
-        questionDiv.dataset.question = index + 1;
-        if (index === 0) questionDiv.classList.add('active');
-
-        const optionsHTML = question.options.map(option => `
-            <label class="option">
-                <input type="radio" name="q${index + 1}" value="${option.value}" required>
-                <span class="option-text">${option.text}</span>
-            </label>
-        `).join('');
-
-        questionDiv.innerHTML = `
-            <h3 class="question-title">Question ${index + 1}: ${question.title}</h3>
-            <div class="options">
-                ${optionsHTML}
-            </div>
-        `;
-
-        questionsContainer.appendChild(questionDiv);
-    });
+    
+    // Create question HTML
+    const questionDiv = document.createElement('div');
+    questionDiv.className = 'question-slide active';
+    questionDiv.dataset.questionId = questionData.id;
+    
+    const optionsHTML = questionData.options.map((option, idx) => `
+        <label class="option" data-value="${option.value}">
+            <input type="radio" name="current_question" value="${option.value}" id="opt_${idx}">
+            <span class="option-text">${option.text}</span>
+        </label>
+    `).join('');
+    
+    questionDiv.innerHTML = `
+        <h3 class="question-title">Question ${currentQuestion + 1}: ${questionData.question}</h3>
+        <div class="options">
+            ${optionsHTML}
+        </div>
+    `;
+    
+    questionsContainer.appendChild(questionDiv);
+    updateProgress();
+    updateNavigationButtons();
 }
 
-function showQuestion(n) {
-    const slides = document.querySelectorAll('.question-slide');
-    slides.forEach(slide => slide.classList.remove('active'));
-    if (slides[n]) {
-        slides[n].classList.add('active');
-    }
-
-    prevBtn.style.display = n === 0 ? 'none' : 'inline-block';
+// ============================================================================
+// NAVIGATION
+// ============================================================================
+function updateNavigationButtons() {
+    if (!prevBtn || !nextBtn) return;
     
-    if (n === totalQuestions - 1) {
-        nextBtn.textContent = 'Complete Assessment';
-    } else {
-        nextBtn.textContent = 'Next';
-    }
-    
-    updateProgress();
+    prevBtn.style.display = currentQuestion === 0 ? 'none' : 'inline-block';
+    nextBtn.textContent = currentQuestion === TOTAL_QUESTIONS - 1 ? 'Complete Assessment' : 'Next';
 }
 
 function updateProgress() {
-    const progress = ((currentQuestion + 1) / totalQuestions) * 100;
+    if (!progressFill || !progressText) return;
+    
+    const progress = ((currentQuestion + 1) / TOTAL_QUESTIONS) * 100;
     progressFill.style.width = progress + '%';
-    progressText.textContent = `Question ${currentQuestion + 1} of ${totalQuestions}`;
+    progressText.textContent = `Question ${currentQuestion + 1} of ${TOTAL_QUESTIONS}`;
 }
 
-function nextQuestion() {
-    const currentQuestionName = `q${currentQuestion + 1}`;
-    if (!answers[currentQuestionName]) {
+async function handleNext() {
+    const selectedOption = document.querySelector('input[name="current_question"]:checked');
+    
+    if (!selectedOption) {
         alert('Please select an answer before proceeding.');
         return;
     }
-
-    if (currentQuestion < totalQuestions - 1) {
+    
+    const currentQuestionId = currentQuestionData.id;
+    const selectedValue = parseInt(selectedOption.value);
+    const selectedText = selectedOption.parentElement.querySelector('.option-text').textContent;
+    
+    // Save answer
+    answers[currentQuestionId] = selectedValue;
+    
+    // Add to conversation history
+    conversationHistory.push({
+        question_number: currentQuestion + 1,
+        question_id: currentQuestionId,
+        question_text: currentQuestionData.question,
+        answer_value: selectedValue,
+        answer_text: selectedText
+    });
+    
+    console.log(`✅ Answer recorded: Q${currentQuestion + 1} = ${selectedValue} ("${selectedText}")`);
+    
+    // Move to next question or finish
+    if (currentQuestion < TOTAL_QUESTIONS - 1) {
         currentQuestion++;
-        showQuestion(currentQuestion);
+        await displayQuestion();
     } else {
         showPincodeSection();
     }
 }
 
-function prevQuestion() {
+function handlePrevious() {
     if (currentQuestion > 0) {
         currentQuestion--;
-        showQuestion(currentQuestion);
+        
+        // Get previous question from history
+        const previousEntry = conversationHistory[currentQuestion];
+        
+        // Reconstruct question
+        const questionData = {
+            id: previousEntry.question_id,
+            question: previousEntry.question_text,
+            options: generateDefaultOptions(),
+            type: 'scale'
+        };
+        
+        displayQuestion(questionData);
+        
+        // Pre-select previous answer
+        setTimeout(() => {
+            const previousValue = answers[previousEntry.question_id];
+            const option = document.querySelector(`input[value="${previousValue}"]`);
+            if (option) {
+                option.checked = true;
+                option.closest('.option').classList.add('selected');
+            }
+        }, 100);
     }
 }
 
+// ============================================================================
+// PINCODE SECTION
+// ============================================================================
 function showPincodeSection() {
-    document.querySelector('.quiz-content').style.display = 'none';
-    document.querySelector('.quiz-progress-container').style.display = 'none';
+    if (!pincodeSection) return;
+    
+    // Hide quiz
+    const quizContent = document.querySelector('.quiz-content');
+    const progressContainer = document.querySelector('.quiz-progress-container');
+    if (quizContent) quizContent.style.display = 'none';
+    if (progressContainer) progressContainer.style.display = 'none';
+    
+    // Show pincode section
     pincodeSection.style.display = 'flex';
     
-    const helperText = locationPermissionGranted 
-        ? '<p style="color: #10b981; margin-top: 10px;">✓ Location detected automatically</p>'
-        : '<p style="color: #f59e0b; margin-top: 10px;">⚠ Please enter your pincode manually</p>';
-    
-    if (!pincodeSection.querySelector('.helper-text')) {
-        pincodeSection.insertAdjacentHTML('beforeend', `<div class="helper-text">${helperText}</div>`);
+    if (detectedPincode) {
+        pincodeInput.value = detectedPincode;
+        pincodeInput.placeholder = `Detected: ${detectedPincode}`;
+    } else {
+        pincodeInput.placeholder = 'Enter your 6-digit pincode';
     }
+}
+
+// ============================================================================
+// SUBMISSION
+// ============================================================================
+function calculateScore() {
+    const totalScore = Object.values(answers).reduce((sum, value) => sum + value, 0);
+    const maxScore = TOTAL_QUESTIONS * 40;
+    return { totalScore, maxScore };
 }
 
 async function submitAssessment(pincode, score, maxScore) {
     try {
-        const response = await fetch('/api/submit-assessment/', {
+        const response = await fetch(SUBMIT_ENDPOINT, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 pincode: pincode,
                 score: score,
                 max_score: maxScore,
-                fingerprint: userFingerprint
+                fingerprint: userFingerprint,
+                conversation_history: conversationHistory
             })
         });
         
         const data = await response.json();
         
         if (response.status === 429) {
-            alert(data.message);
+            alert(data.message || 'Rate limit exceeded. Please try again later.');
             setTimeout(() => location.reload(), 2000);
             return null;
         }
@@ -511,19 +546,26 @@ async function submitAssessment(pincode, score, maxScore) {
     }
 }
 
-async function displayResults(totalScore, maxScore, submissionData, days_rem) {
-    pincodeSection.style.display = 'none';
-    form.style.display = 'none';
-    document.querySelector('.quiz-progress-container').style.display = 'none';
+// ============================================================================
+// RESULTS DISPLAY
+// ============================================================================
+async function displayResults(totalScore, maxScore, submissionData) {
+    if (!resultDiv) return;
+    
+    // Hide other sections
+    if (pincodeSection) pincodeSection.style.display = 'none';
+    if (form) form.style.display = 'none';
+    const progressContainer = document.querySelector('.quiz-progress-container');
+    if (progressContainer) progressContainer.style.display = 'none';
 
-    let resultClass, resultIcon, resultTitle, resultDescription, recommendations;
     const scorePercentage = (totalScore / maxScore) * 100;
+    let resultClass, resultIcon, resultTitle, resultDescription, recommendations;
 
     if (scorePercentage <= 30) {
         resultClass = 'excellent';
         resultIcon = '🌟';
         resultTitle = 'Excellent Mental Wellness!';
-        resultDescription = 'You\'re doing great! Your stress levels are well-managed and you have healthy coping mechanisms in place.';
+        resultDescription = 'Based on your responses, you\'re managing stress well and have healthy coping mechanisms.';
         recommendations = `
             <div class="recommendations">
                 <h4>Keep up the great work:</h4>
@@ -531,7 +573,6 @@ async function displayResults(totalScore, maxScore, submissionData, days_rem) {
                     <li>Continue your current self-care practices</li>
                     <li>Maintain your work-life balance</li>
                     <li>Share your strategies with others</li>
-                    <li>Consider mentoring someone who needs support</li>
                 </ul>
             </div>
         `;
@@ -539,16 +580,15 @@ async function displayResults(totalScore, maxScore, submissionData, days_rem) {
         resultClass = 'good';
         resultIcon = '😊';
         resultTitle = 'Good Mental Health';
-        resultDescription = 'You\'re doing well overall, but there\'s room for improvement. Some stress is normal, but let\'s work on managing it better.';
+        resultDescription = 'You\'re doing well overall, with some areas for improvement in stress management.';
         recommendations = `
             <div class="recommendations">
                 <h4>Recommended actions:</h4>
                 <ul>
                     <li>Practice deep breathing exercises daily</li>
-                    <li>Try meditation or mindfulness (even 5 minutes helps)</li>
-                    <li>Ensure 7-8 hours of sleep</li>
-                    <li>Engage in regular physical activity</li>
-                    <li>Connect with friends and family regularly</li>
+                    <li>Try meditation or mindfulness (5-10 minutes)</li>
+                    <li>Ensure 7-8 hours of quality sleep</li>
+                    <li>Regular physical activity</li>
                 </ul>
             </div>
         `;
@@ -556,20 +596,19 @@ async function displayResults(totalScore, maxScore, submissionData, days_rem) {
         resultClass = 'moderate';
         resultIcon = '😟';
         resultTitle = 'Moderate Stress Levels';
-        resultDescription = 'You\'re experiencing significant stress that may be impacting your daily life. It\'s important to take proactive steps now.';
+        resultDescription = 'Your responses indicate significant stress that may be impacting your daily life.';
         recommendations = `
             <div class="recommendations">
                 <h4>Important steps to take:</h4>
                 <ul>
                     <li>Consider speaking with a mental health professional</li>
-                    <li>Practice stress management techniques daily</li>
-                    <li>Reach out to trusted friends or family for support</li>
+                    <li>Practice daily stress management techniques</li>
+                    <li>Reach out to trusted friends or family</li>
                     <li>Evaluate and adjust your daily routine</li>
-                    <li>Limit caffeine and ensure good nutrition</li>
                 </ul>
                 <div class="helpline" style="margin-top: 20px; padding: 15px; background: #fef3c7; border-radius: 8px;">
                     <h4>📞 Mental Health Support:</h4>
-                    <div class="helpline-number" style="font-size: 1.2em; font-weight: bold; color: #92400e;">
+                    <div style="font-size: 1.2em; font-weight: bold; color: #92400e;">
                         KIRAN Helpline: 1800-599-0019 (24/7)
                     </div>
                 </div>
@@ -579,7 +618,7 @@ async function displayResults(totalScore, maxScore, submissionData, days_rem) {
         resultClass = 'concerning';
         resultIcon = '🚨';
         resultTitle = 'High Stress - Support Recommended';
-        resultDescription = 'Your stress levels are very high and may require professional attention. Please don\'t hesitate to reach out for help - you\'re not alone.';
+        resultDescription = 'Your stress levels appear very high. Professional support is strongly recommended.';
         recommendations = `
             <div class="recommendations">
                 <h4>🚨 Urgent Action Required:</h4>
@@ -587,21 +626,17 @@ async function displayResults(totalScore, maxScore, submissionData, days_rem) {
                     <li><strong>Contact a mental health professional immediately</strong></li>
                     <li>Reach out to trusted friends or family today</li>
                     <li>Use emergency services if you\'re in crisis</li>
-                    <li>Don\'t face this alone - support is available and effective</li>
                 </ul>
                 <div class="helpline" style="margin-top: 20px; padding: 15px; background: #fee2e2; border-radius: 8px; border-left: 4px solid #dc2626;">
                     <h4>📞 Emergency Mental Health Support:</h4>
                     <div style="margin: 10px 0;">
-                        <div class="helpline-number" style="font-size: 1.3em; font-weight: bold; color: #991b1b; margin: 5px 0;">
-                            KIRAN Mental Health: 9152987821
+                        <div style="font-size: 1.3em; font-weight: bold; color: #991b1b; margin: 5px 0;">
+                            KIRAN: 9152987821
                         </div>
-                        <div class="helpline-number" style="font-size: 1.3em; font-weight: bold; color: #991b1b; margin: 5px 0;">
-                            24/7 Helpline: 1800-599-0019
+                        <div style="font-size: 1.3em; font-weight: bold; color: #991b1b; margin: 5px 0;">
+                            24/7: 1800-599-0019
                         </div>
                     </div>
-                    <p style="margin-top: 10px; color: #7f1d1d; font-size: 0.95em;">
-                        These helplines are free, confidential, and available 24/7. Trained professionals are ready to help you.
-                    </p>
                 </div>
             </div>
         `;
@@ -609,16 +644,9 @@ async function displayResults(totalScore, maxScore, submissionData, days_rem) {
 
     let communityStats = '';
     if (submissionData && submissionData.total_assessments > 0) {
-        const stressLevelLabels = {
-            'excellent': '🟢 Excellent',
-            'good': '🟡 Good',
-            'moderate': '🟠 Moderate',
-            'concerning': '🔴 Concerning'
-        };
-        
         communityStats = `
             <div class="community-stats" style="margin-top: 30px; padding: 20px; background: #f0f9ff; border-radius: 10px;">
-                <h4 style="margin-bottom: 15px;">📊 Your Area Statistics (Pincode: ${submissionData.pincode})</h4>
+                <h4>📊 Your Area Statistics (Pincode: ${submissionData.pincode})</h4>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0;">
                     <div style="padding: 10px; background: white; border-radius: 8px;">
                         <div style="font-size: 0.9em; color: #64748b;">Total Assessments</div>
@@ -626,40 +654,29 @@ async function displayResults(totalScore, maxScore, submissionData, days_rem) {
                     </div>
                     <div style="padding: 10px; background: white; border-radius: 8px;">
                         <div style="font-size: 0.9em; color: #64748b;">Area Stress Level</div>
-                        <div style="font-size: 1.2em; font-weight: bold; color: ${submissionData.color};">
-                            ${stressLevelLabels[submissionData.stress_level] || submissionData.stress_level}
-                        </div>
+                        <div style="font-size: 1.2em; font-weight: bold;">${submissionData.stress_level || 'N/A'}</div>
                     </div>
                 </div>
-                <p style="color: #0369a1; font-size: 0.9em; margin-top: 15px; line-height: 1.5;">
-                    <strong>Thank you for participating!</strong> Your contribution helps build a comprehensive 
-                    mental health map of India, enabling better support and resources for your community.
-                </p>
             </div>
         `;
     }
 
     resultDiv.innerHTML = `
-        <div class="result-icon" style="font-size: 5rem; margin-bottom: 20px;">${resultIcon}</div>
-        <h2 class="result-title" style="margin-bottom: 15px;">${resultTitle}</h2>
-        <p class="result-description" style="font-size: 1.1em; margin-bottom: 20px;">${resultDescription}</p>
+        <div class="result-icon" style="font-size: 5rem; margin-bottom: 20px; text-align: center;">${resultIcon}</div>
+        <h2 class="result-title" style="text-align: center;">${resultTitle}</h2>
+        <p class="result-description" style="text-align: center;">${resultDescription}</p>
         
-        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0;">
+        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center;">
             <p style="margin: 0;"><strong>Your Score: ${totalScore}/${maxScore}</strong> (${scorePercentage.toFixed(1)}%)</p>
         </div>
         
         ${recommendations}
         ${communityStats}
         
-        <div style="margin-top: 30px; padding: 15px; background: #fef3c7; border-radius: 8px;">
-            <p style="margin: 0; color: #78350f; font-size: 0.95em;">
-                <strong>⏰ Cooldown Period:</strong> You can retake this assessment in ${days_rem} days to track your progress.
-                This helps maintain data accuracy.
-            </p>
-        </div>
-        
-        <div style="margin-top: 30px;">
-            <button class="btn btn-primary" onclick="location.href='/'">Back to Home</button>
+        <div style="margin-top: 30px; text-align: center;">
+            <button class="btn btn-primary" onclick="location.href='/'" style="padding: 12px 30px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1em;">
+                Back to Home
+            </button>
         </div>
     `;
 
@@ -667,131 +684,131 @@ async function displayResults(totalScore, maxScore, submissionData, days_rem) {
     resultDiv.style.display = 'block';
 }
 
-function addEventListeners() {
-    prevBtn.addEventListener('click', prevQuestion);
-    nextBtn.addEventListener('click', nextQuestion);
-
-    document.addEventListener('click', function (e) {
+// ============================================================================
+// EVENT LISTENERS
+// ============================================================================
+function initializeEventListeners() {
+    // Navigation buttons
+    if (prevBtn) prevBtn.addEventListener('click', handlePrevious);
+    if (nextBtn) nextBtn.addEventListener('click', handleNext);
+    
+    // Option selection
+    document.addEventListener('click', function(e) {
         if (e.target.closest('.option')) {
             const option = e.target.closest('.option');
             const input = option.querySelector('input[type="radio"]');
             if (!input) return;
-
-            const questionName = input.name;
-            const questionSlide = option.closest('.question-slide');
             
-            if (questionSlide) {
-                questionSlide.querySelectorAll('.option').forEach(opt => {
-                    opt.classList.remove('selected');
-                });
-            }
-
+            // Remove previous selection
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Add new selection
             option.classList.add('selected');
             input.checked = true;
-            answers[questionName] = parseInt(input.value);
-            
-            console.log(`Answer recorded: ${questionName} = ${answers[questionName]}`);
         }
     });
-
-    document.getElementById('getResultBtn').addEventListener('click', async function() {
-        const pin = pincodeInput.value.trim();
-        
-        if (!/^\d{6}$/.test(pin)) {
-            alert("Please enter a valid 6-digit pincode.");
-            pincodeInput.focus();
-            return;
-        }
-        
-        const answeredQuestions = Object.keys(answers).length;
-        if (answeredQuestions !== totalQuestions) {
-            alert(`Please answer all questions. You have answered ${answeredQuestions} out of ${totalQuestions} questions.`);
-            return;
-        }
-        
-        const btn = this;
-        const originalText = btn.textContent;
-        btn.disabled = true;
-        btn.textContent = 'Submitting...';
-        btn.style.cursor = 'wait';
-        
-        try {
-            const totalScore = Object.values(answers).reduce((sum, value) => sum + value, 0);
-            const maxScore = totalQuestions * 40;
+    
+    // Submit button
+    if (getResultBtn) {
+        getResultBtn.addEventListener('click', async function() {
+            const pin = pincodeInput.value.trim();
             
-            console.log(`Submitting assessment: Score=${totalScore}/${maxScore}, Pincode=${pin}`);
-            
-            const submissionResult = await submitAssessment(pin, totalScore, maxScore);
-            
-            if (submissionResult) {
-                console.log('Assessment submitted successfully:', submissionResult);
-                await displayResults(totalScore, maxScore, submissionResult, submissionResult.days_remaining);
-            } else {
-                throw new Error('Failed to submit assessment');
+            if (!/^\d{6}$/.test(pin)) {
+                alert("Please enter a valid 6-digit pincode.");
+                pincodeInput.focus();
+                return;
             }
-        } catch (error) {
-            console.error('Submission error:', error);
-            alert('Failed to submit assessment. Please try again. Error: ' + error.message);
-            btn.disabled = false;
-            btn.textContent = originalText;
-            btn.style.cursor = 'pointer';
-        }
-    });
-
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-    });
-
-    pincodeInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
+            
+            const btn = this;
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+            
+            try {
+                const { totalScore, maxScore } = calculateScore();
+                const submissionResult = await submitAssessment(pin, totalScore, maxScore);
+                
+                if (submissionResult) {
+                    await displayResults(totalScore, maxScore, submissionResult);
+                }
+            } catch (error) {
+                console.error('Submission error:', error);
+                alert('Failed to submit assessment. Please try again.');
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        });
+    }
+    
+    // Pincode input validation
+    if (pincodeInput) {
+        pincodeInput.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^\d]/g, '');
+        });
+        
+        pincodeInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (getResultBtn) getResultBtn.click();
+            }
+        });
+    }
+    
+    // Form submission
+    if (form) {
+        form.addEventListener('submit', function(e) {
             e.preventDefault();
-            document.getElementById('getResultBtn').click();
-        }
-    });
-
-    pincodeInput.addEventListener('input', function(e) {
-        this.value = this.value.replace(/[^\d]/g, '');
-    });
+        });
+    }
 }
 
+// ============================================================================
+// MAIN INITIALIZATION
+// ============================================================================
 async function init() {
-    console.log('Initializing Mental Health Assessment...');
+    console.log('🚀 Initializing Dynamic AI Mental Health Assessment...');
     
+    // Find DOM elements
+    initializeDOMElements();
+    
+    // Generate fingerprint
     userFingerprint = generateFingerprint();
-    console.log('User fingerprint generated');
+    console.log('✅ User fingerprint generated');
     
+    // Check eligibility
     const isEligible = await checkEligibility();
     if (!isEligible) {
-        console.log('User not eligible - cooldown active');
+        console.log('❌ User not eligible - cooldown active');
         return;
     }
     
-    console.log('User eligible - proceeding with assessment');
+    console.log('✅ User eligible - starting assessment');
     
-    selectRandomQuestions();
-    console.log(`Selected ${selectedQuestions.length} random questions`);
+    // Initialize event listeners
+    initializeEventListeners();
     
-    generateQuestions();
-    showQuestion(0);
-    updateProgress();
-    addEventListeners();
+    // Request location in background
+    requestLocation().then(pincode => {
+        detectedPincode = pincode;
+        if (pincode) {
+            console.log('📍 Location detected:', pincode);
+        }
+    });
     
-    console.log('Assessment initialized successfully');
+    // Start with first question
+    await displayQuestion();
     
-    console.log('Attempting to detect location...');
-    detectedPincode = await requestLocation();
-    
-    if (detectedPincode) {
-        console.log('Location detected, pincode:', detectedPincode);
-        pincodeInput.value = detectedPincode;
-        pincodeInput.setAttribute('placeholder', `Detected: ${detectedPincode}`);
-    } else {
-        console.log('Location not detected - user will enter manually');
-        pincodeInput.setAttribute('placeholder', 'Enter your 6-digit pincode');
-    }
+    console.log('✅ Assessment initialized successfully');
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, starting initialization...');
+// ============================================================================
+// START APPLICATION WHEN DOM IS READY
+// ============================================================================
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    // DOM already loaded
     init();
-});
+}

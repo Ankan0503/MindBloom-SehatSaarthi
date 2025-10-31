@@ -11,4 +11,5 @@ urlpatterns = [
     path('', include('doctors.urls')),
     path('', include('assessment.urls')),
     path('',include('stressmap.urls')),
+    path('',include('AssessQues.urls')),
 ]

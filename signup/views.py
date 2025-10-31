@@ -187,3 +187,9 @@ def mental_health_view(request):
     return render(request, 'mindbloom.html', {
         "STATIC_URL": settings.STATIC_URL
     })
+
+def journal_view(request):
+    return render(request, 'journal.html')
+
+def sentiment_dashboard_view(request):
+    return render(request, 'sentiment_dashboard.html')

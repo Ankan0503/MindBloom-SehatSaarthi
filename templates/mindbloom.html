@@ -145,56 +145,92 @@
     </section>
 
     <!--Quiz-->
-    <section class="quizzz" id="quiz">
-        <div class="header">
-            <h1>🧠 Mental Health Assessment</h1>
-            <p>Take this quick assessment to understand your current stress levels and get personalized recommendations
-                for your mental wellness journey.</p>
-            <a href="{% url 'stressmap' %}" class="btn-view-map">
-                🗺️ View India Stress Map
-            </a>
-        </div>
-
-        <div class="pincode-section" id="pincodeSection" style="display: none;">
-            <label for="pincodeInput">Enter your 6-digit Pincode:</label>
-            <input type="text" id="pincodeInput" maxlength="6" pattern="\d{6}" placeholder="e.g., 110001" required>
-            <button type="button" class="btn btn-primary" id="getResultBtn">Get Result</button>
-        </div>
-
-        <div class="quiz-progress-container">
-            <div class="quiz-progress-bar">
-                <div class="quiz-progress-fill" id="quizProgressFill"></div>
+    <div class="assessment-container">
+        <!-- Left Side - Quiz -->
+        <section class="quizzz" id="quiz">
+            <div class="header">
+                <h1>🧠 Mental Health Assessment</h1>
+                <p>Take this quick assessment to understand your current stress levels and get personalized
+                    recommendations
+                    for your mental wellness journey.</p>
+                <a href="{% url 'stressmap' %}" class="btn-view-map">
+                    🗺️ View India Stress Map
+                </a>
             </div>
-            <div class="quiz-progress-text" id="quizProgressText">Question 1 of 20</div>
-        </div>
-        <div class="quiz-content">
-            <form id="quizForm">
-                <!-- Questions will be dynamically generated here -->
-                <div id="questionsContainer"></div>
 
-                <div class="navigation">
-                    <button type="button" class="btn btn-secondary" id="prevBtn"
-                        style="display: none;">Previous</button>
-                    <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
+            <div class="pincode-section" id="pincodeSection" style="display: none;">
+                <label for="pincodeInput">Enter your 6-digit Pincode:</label>
+                <input type="text" id="pincodeInput" maxlength="6" pattern="\d{6}" placeholder="e.g., 110001" required>
+                <button type="button" class="btn btn-primary" id="getResultBtn">Get Result</button>
+            </div>
+
+            <div class="quiz-progress-container">
+                <div class="quiz-progress-bar">
+                    <div class="quiz-progress-fill" id="quizProgressFill"></div>
                 </div>
-            </form>
+                <div class="quiz-progress-text" id="quizProgressText">Question 1 of 20</div>
+            </div>
+            <div class="quiz-content">
+                <form id="quizForm">
+                    <!-- Questions will be dynamically generated here -->
+                    <div id="questionsContainer"></div>
 
-            <!-- Results Section -->
-        </div>
-        <div id="result" class="result">
-            <div id="resultContent"></div>
-        </div>
-        <script>
-            const mapUrl = "{% url 'stressmap' %}"
-        </script>
-        <script src="{% static 'js/mind_js/quiz.js'%}"></script>
-    </section>
+                    <div class="navigation">
+                        <button type="button" class="btn btn-secondary" id="prevBtn"
+                            style="display: none;">Previous</button>
+                        <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
+                    </div>
+                </form>
+
+                <!-- Results Section -->
+            </div>
+            <div id="result" class="result">
+                <div id="resultContent"></div>
+            </div>
+            <script>
+                const mapUrl = "{% url 'stressmap' %}"
+            </script>
+            <script src="{% static 'js/mind_js/quiz.js'%}"></script>
+        </section>
+
+        <!-- Right Side - Journal CTA -->
+        <section class="journal-cta-section">
+            <div class="journal-cta-container">
+                <div class="journal-cta-content">
+                    <div class="journal-icon">📔</div>
+                    <h2>Daily Mental Health Journal</h2>
+                    <p>Express your thoughts and feelings. Write about your day and track your emotional wellbeing over
+                        time.</p>
+                    <a href="{% url 'journal' %}" class="btn-journal">
+                        ✍️ Start Writing Today
+                    </a>
+                </div>
+            </div>
+
+            <!-- Additional Journal Benefits -->
+            <div class="journal-benefits">
+                <div class="benefit-item">
+                    <span class="benefit-icon">🎯</span>
+                    <h3>Track Progress</h3>
+                    <p>Monitor your emotional journey over time</p>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-icon">💡</span>
+                    <h3>AI Analysis</h3>
+                    <p>Get insights from sentiment analysis</p>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-icon">🔒</span>
+                    <h3>Private & Safe</h3>
+                    <p>Your entries are completely confidential</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
     <a href="{% url 'stressmap' %}" class="floating-map-btn" title="View Stress Map">
         🗺️
     </a>
-    <!--<div class="b">-->
-    <!--    <button class="btn"><a href="https://glittering-pavlova-8e98e1.netlify.app/" style="color: white; text-decoration: none">Analyse Text</a></button>-->
-    <!--</div>-->
     <!-- ================== Yoga & Meditation Section ================== -->
     <section>
         <div class="main-content" id="yoga-meditation">
