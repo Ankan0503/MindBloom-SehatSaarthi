@@ -520,7 +520,7 @@ async function analyzeSentiment() {
     historyCanvas.style.display = "none";
 
     try {
-        const response = await fetch("http://127.0.0.1:5000/analyze", {
+        const response = await fetch("https://sentimentalanalyser-production.up.railway.app/analyze", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text: textContent, images: images })
@@ -579,7 +579,7 @@ function emotionColor(emotion) {
 }
 
 async function loadMoodHistory() {
-    const res = await fetch("http://127.0.0.1:5000/history");
+    const res = await fetch("https://sentimentalanalyser-production.up.railway.app/history");
     const history = await res.json();
     const historyCanvas = document.getElementById("moodHistoryChart");
     if (!history.length) return;
