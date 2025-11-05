@@ -151,83 +151,129 @@
             <div class="header">
                 <h1>🧠 Mental Health Assessment</h1>
                 <p>Take this quick assessment to understand your current stress levels and get personalized
-                    recommendations
-                    for your mental wellness journey.</p>
+                    recommendations for your mental wellness journey.</p>
+                <!-- Use your actual URL pattern -->
                 <a href="{% url 'stressmap' %}" class="btn-view-map">
                     🗺️ View India Stress Map
                 </a>
             </div>
 
+            <!-- NEW: Initial Input Section -->
+            <div class="initial-input-section" id="initialInputSection">
+                <h2>✨ Start Your Personalized Assessment</h2>
+                <p>Share a bit about your mental health to help us create questions tailored specifically to you, or
+                    skip to begin with general questions.</p>
+
+                <textarea class="initial-textarea" id="initialTextarea" placeholder="Write about your mental health to start personalized assessment...
+
+Examples:
+• How you've been feeling lately
+• Any specific stressors or concerns
+• Sleep patterns, work stress, relationships
+• Physical symptoms you've noticed
+• Anything that's been on your mind
+
+The more you share, the more personalized your assessment will be!" maxlength="1000"></textarea>
+
+                <div class="char-counter" id="initialCharCounter">0/1000</div>
+
+                <div class="initial-buttons">
+                    <button type="button" class="btn-start-with-text" id="btnStartWithText" disabled>
+                        ✓ Start Personalized Assessment
+                    </button>
+                    <button type="button" class="btn-skip" id="btnSkip">
+                        ⏭️ Skip and Start Assessment
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pincode Section (shown after quiz completion) -->
             <div class="pincode-section" id="pincodeSection" style="display: none;">
                 <label for="pincodeInput">Enter your 6-digit Pincode:</label>
                 <input type="text" id="pincodeInput" maxlength="6" pattern="\d{6}" placeholder="e.g., 110001" required>
                 <button type="button" class="btn btn-primary" id="getResultBtn">Get Result</button>
             </div>
 
+            <!-- Progress Bar -->
             <div class="quiz-progress-container">
                 <div class="quiz-progress-bar">
                     <div class="quiz-progress-fill" id="quizProgressFill"></div>
                 </div>
-                <div class="quiz-progress-text" id="quizProgressText">Question 1 of 20</div>
+                <div class="quiz-progress-text" id="quizProgressText">Question 1 of 10</div>
             </div>
+
+            <!-- Quiz Content -->
             <div class="quiz-content">
                 <form id="quizForm">
                     <!-- Questions will be dynamically generated here -->
+                    {% csrf_token %}
                     <div id="questionsContainer"></div>
 
                     <div class="navigation">
-                        <button type="button" class="btn btn-secondary" id="prevBtn"
-                            style="display: none;">Previous</button>
-                        <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
+                        <button type="button" class="btn btn-secondary" id="prevBtn" style="display: none;">
+                            Previous
+                        </button>
+                        <button type="button" class="btn btn-primary" id="nextBtn" disabled>
+                            Next
+                        </button>
                     </div>
                 </form>
-
-                <!-- Results Section -->
             </div>
+
+            <!-- Results Section -->
             <div id="result" class="result">
                 <div id="resultContent"></div>
             </div>
             <script>
                 const mapUrl = "{% url 'stressmap' %}"
             </script>
-            <script src="{% static 'js/mind_js/quiz.js'%}"></script>
+            <script src="{% static 'js/mind_js/quiz.js' %}"></script>
         </section>
 
         <!-- Right Side - Journal CTA -->
-        <section class="journal-cta-section">
+        <aside class="journal-cta-section">
             <div class="journal-cta-container">
                 <div class="journal-cta-content">
                     <div class="journal-icon">📔</div>
-                    <h2>Daily Mental Health Journal</h2>
-                    <p>Express your thoughts and feelings. Write about your day and track your emotional wellbeing over
-                        time.</p>
+                    <h2>Track Your Mental Wellness</h2>
+                    <p>Start journaling your thoughts and emotions. Research shows daily journaling reduces stress and
+                        improves mental clarity.</p>
+                    <!-- Use your actual URL pattern -->
                     <a href="{% url 'journal' %}" class="btn-journal">
-                        ✍️ Start Writing Today
+                        Start Journaling
                     </a>
                 </div>
             </div>
 
-            <!-- Additional Journal Benefits -->
             <div class="journal-benefits">
                 <div class="benefit-item">
-                    <span class="benefit-icon">🎯</span>
-                    <h3>Track Progress</h3>
-                    <p>Monitor your emotional journey over time</p>
+                    <div class="benefit-icon">🧘</div>
+                    <div>
+                        <h3>Reduce Stress</h3>
+                        <p>Express your thoughts and release emotional tension through writing</p>
+                    </div>
                 </div>
+
                 <div class="benefit-item">
-                    <span class="benefit-icon">💡</span>
-                    <h3>AI Analysis</h3>
-                    <p>Get insights from sentiment analysis</p>
+                    <div class="benefit-icon">💭</div>
+                    <div>
+                        <h3>Gain Clarity</h3>
+                        <p>Understand your emotions and identify patterns in your mental health</p>
+                    </div>
                 </div>
+
                 <div class="benefit-item">
-                    <span class="benefit-icon">🔒</span>
-                    <h3>Private & Safe</h3>
-                    <p>Your entries are completely confidential</p>
+                    <div class="benefit-icon">📈</div>
+                    <div>
+                        <h3>Track Progress</h3>
+                        <p>Monitor your wellness journey and celebrate improvements over time</p>
+                    </div>
                 </div>
             </div>
-        </section>
+        </aside>
     </div>
 
+    <!-- Floating Map Button -->
     <a href="{% url 'stressmap' %}" class="floating-map-btn" title="View Stress Map">
         🗺️
     </a>

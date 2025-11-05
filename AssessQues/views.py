@@ -1,4 +1,4 @@
-# views.py - Django view for AI question generation using Perplexity AI
+# views.py - Enhanced Django view with text input support
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -6,32 +6,39 @@ import json
 import requests
 import os
 
-# Perplexity API Configuration
-PERPLEXITY_API_KEY = os.environ.get('PERPLEXITY_API_KEY')
-PERPLEXITY_API_URL = "https://api.perplexity.ai/chat/completions"
+# OpenRouter API Configuration
+OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY')
+OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def generate_question(request):
     """
-    Generate personalized mental health assessment questions using Perplexity AI
-    based on previous conversation history
+    Generate personalized mental health assessment questions using OpenRouter
+    with support for initial user input and additional text responses
     """
     try:
         data = json.loads(request.body)
         conversation_history = data.get('conversation_history', [])
         question_number = data.get('question_number', 1)
         total_questions = data.get('total_questions', 10)
+        initial_user_input = data.get('initial_user_input', None)
+        user_has_skipped = data.get('user_has_skipped', False)
         
         # Build context from previous answers
-        context = build_conversation_context(conversation_history)
+        context = build_conversation_context(
+            conversation_history, 
+            initial_user_input, 
+            user_has_skipped
+        )
         
-        # Generate question using Perplexity AI
+        # Generate question using OpenRouter AI
         question_data = generate_ai_question(
             context, 
             question_number, 
             total_questions,
-            conversation_history
+            conversation_history,
+            initial_user_input
         )
         
         return JsonResponse({
@@ -50,81 +57,172 @@ def generate_question(request):
         }, status=500)
 
 
-def build_conversation_context(conversation_history):
-    """Build a summary of previous answers for AI context"""
-    if not conversation_history:
-        return "This is the first question. Start with a broad assessment."
-    
+def build_conversation_context(conversation_history, initial_user_input=None, user_has_skipped=False):
+    """
+    Build enhanced conversation context including initial user input and text responses
+    """
     context_parts = []
-    high_stress_areas = []
     
-    for entry in conversation_history:
-        answer_value = entry.get('answer_value', 0)
-        answer_text = entry.get('answer_text', '')
-        
-        # Identify areas of concern (high values indicate more stress)
-        if answer_value >= 30:
-            high_stress_areas.append({
-                'question': entry.get('question_number'),
-                'response': answer_text,
-                'severity': answer_value
-            })
-        
+    # Add initial user input if provided
+    if initial_user_input and not user_has_skipped:
         context_parts.append(
-            f"Q{entry.get('question_number')}: "
-            f"User responded with '{answer_text}' (stress level: {answer_value}/40)"
+            f"📝 INITIAL USER INPUT (Question 0 - User's self-description):\n"
+            f"\"{initial_user_input}\"\n"
+            f"[This is what the user wrote about their mental health before starting. "
+            f"Use this as PRIMARY CONTEXT for all questions. Reference specific concerns they mentioned.]"
         )
     
-    context = "\n".join(context_parts)
+    if not conversation_history:
+        if initial_user_input:
+            return "\n\n".join(context_parts) + "\n\nThis is the first formal question. Build directly on what they wrote above."
+        return "This is the first question. Start with a broad assessment."
     
+    high_stress_areas = []
+    key_text_insights = []
+    
+    for entry in conversation_history:
+        selected_option = entry.get('selected_option')
+        selected_text = entry.get('selected_option_text', '')
+        user_text_input = entry.get('user_text_input', '')
+        question_text = entry.get('question_text', '')
+        question_number = entry.get('question_number')
+        has_both = entry.get('has_both', False)
+        
+        # Build response summary
+        response_summary = []
+        
+        if selected_option:
+            response_summary.append(f"Selected option: '{selected_text}' (stress level: {selected_option}/40)")
+            
+            # Track high stress responses
+            if selected_option >= 30:
+                high_stress_areas.append({
+                    'question': question_number,
+                    'question_text': question_text,
+                    'response': selected_text,
+                    'severity': selected_option
+                })
+        
+        if user_text_input:
+            response_summary.append(f"User wrote: \"{user_text_input}\"")
+            
+            # Extract key insights from text
+            key_text_insights.append({
+                'question': question_number,
+                'text': user_text_input,
+                'context': question_text
+            })
+        
+        if not selected_option and user_text_input:
+            response_summary.append("[User provided only text, no option selected]")
+        
+        # Combine into context entry
+        context_entry = (
+            f"Q{question_number}: {question_text}\n"
+            f"  Response: {' | '.join(response_summary)}"
+        )
+        
+        if has_both:
+            context_entry += "\n  [User provided BOTH option AND detailed text - this is particularly informative]"
+        
+        context_parts.append(context_entry)
+    
+    context = "\n\n".join(context_parts)
+    
+    # Add high stress areas summary
     if high_stress_areas:
         focus_areas = "\n".join([
-            f"- High stress in area related to: {area['response']}"
+            f"  • Q{area['question']}: {area['question_text']}\n"
+            f"    High stress: {area['response']} (severity: {area['severity']}/40)"
             for area in high_stress_areas
         ])
-        context += f"\n\nAreas requiring follow-up:\n{focus_areas}"
+        context += f"\n\n🚨 HIGH STRESS AREAS REQUIRING FOLLOW-UP:\n{focus_areas}"
+    
+    # Add key text insights summary
+    if key_text_insights:
+        insights = "\n".join([
+            f"  • Q{insight['question']}: \"{insight['text'][:100]}{'...' if len(insight['text']) > 100 else ''}\""
+            for insight in key_text_insights
+        ])
+        context += f"\n\n💭 KEY USER-PROVIDED INSIGHTS (reference these directly):\n{insights}"
     
     return context
 
 
-def generate_ai_question(context, question_number, total_questions, conversation_history):
+def generate_ai_question(context, question_number, total_questions, conversation_history, initial_user_input=None):
     """
-    Use Perplexity AI to generate personalized next question
+    Use OpenRouter AI to generate personalized next question
+    Enhanced to leverage user's text input
     """
     
     # Determine assessment phase
     if question_number <= 3:
         phase = "initial_broad_assessment"
-        instruction = "Ask a general question to understand their overall mental state and identify key areas of concern."
+        if initial_user_input:
+            instruction = (
+                "The user already described their situation in detail. Ask a focused question "
+                "that builds DIRECTLY on specific concerns they mentioned. Reference their exact words."
+            )
+        else:
+            instruction = "Ask a general question to understand their overall mental state."
     elif question_number <= 7:
         phase = "deep_dive"
-        instruction = "Based on their previous answers, dive deeper into the specific areas showing stress or concern."
+        instruction = (
+            "Dive deeper into areas showing stress. If they provided text responses, "
+            "acknowledge and build on what they shared. Use their own words to show you're listening."
+        )
     else:
         phase = "wrap_up"
-        instruction = "Ask about coping mechanisms, support systems, or any remaining important aspects not yet covered."
+        instruction = (
+            "Focus on coping mechanisms, support systems, or important aspects not yet covered. "
+            "If they've been detailed in text responses, acknowledge their openness."
+        )
     
-    system_prompt = """You are a compassionate mental health assessment assistant. Your role is to generate personalized, empathetic questions that help understand someone's mental wellness and stress levels.
+    system_prompt = """You are a compassionate mental health assessment assistant. Your role is to generate personalized, empathetic questions.
 
-Guidelines:
+CRITICAL INSTRUCTIONS:
+- When users provide text responses, READ THEM CAREFULLY and reference specific details
+- Build each question naturally from what they've shared, using their own words when appropriate
+- If they mentioned something like "work deadlines", ask specifically about work stress
+- If they wrote about "not sleeping", focus on sleep patterns
+- Make them feel HEARD - show you're paying attention to their written responses
 - Be warm, non-judgmental, and supportive
 - Ask one clear question at a time
-- Build naturally on previous responses
+
+Guidelines:
+- Build naturally on previous responses - both option selections AND text input
 - Focus on actionable areas: sleep, work stress, relationships, self-care, emotions, physical symptoms
-- Match the assessment phase (broad → deep dive → wrap-up)"""
+- Match the assessment phase (broad → deep dive → wrap-up)
+- Questions should feel conversational, like a caring professional
+
+You must respond with ONLY valid JSON, nothing else."""
+
+    # Build user prompt with emphasis on text responses
+    text_emphasis = ""
+    if any(entry.get('user_text_input') for entry in conversation_history):
+        text_emphasis = """
+⚠️ IMPORTANT: The user has provided detailed text responses. You MUST:
+1. Reference their specific words and concerns
+2. Build directly on what they shared
+3. Show you're listening by acknowledging details they mentioned
+4. Make the conversation feel personalized, not generic
+"""
 
     user_prompt = f"""Generate the next question for a mental wellness assessment.
 
 Assessment Progress: Question {question_number} of {total_questions}
 Phase: {phase}
 
+{text_emphasis}
+
 Previous Conversation:
 {context}
 
 Instructions: {instruction}
 
-Return ONLY a valid JSON object in this exact format (no markdown, no explanation):
+Return ONLY a valid JSON object (no markdown, no explanation):
 {{
-    "question": "Your empathetic question here",
+    "question": "Your empathetic, personalized question here",
     "type": "scale",
     "options": [
         {{"value": 10, "text": "😊 [Positive/low stress response]"}},
@@ -136,63 +234,58 @@ Return ONLY a valid JSON object in this exact format (no markdown, no explanatio
 }}
 
 Important:
-- Use emojis that match the sentiment
-- Make option texts specific to the question
-- Ensure options progress from low stress (10) to high stress (40)
-- Return ONLY the JSON, no additional text"""
+- Use emojis that match sentiment (😊😌😕😔)
+- Make options specific to the question
+- Progress logically from low stress (10) to high stress (40)
+- Return ONLY the JSON object"""
 
     try:
-        print(f"🤖 Calling Perplexity API for question {question_number}...")
+        print(f"🤖 Calling OpenRouter API for question {question_number}...")
         
-        # Prepare the API request
         headers = {
-            "Authorization": f"Bearer {PERPLEXITY_API_KEY}",
-            "Content-Type": "application/json"
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "http://localhost:8000",
+            "X-Title": "Mental Health Assessment"
         }
         
         payload = {
-            "model": "sonar-pro",  # Perplexity's best model
+            "model": "openai/gpt-oss-20b:free",
             "messages": [
-                {
-                    "role": "system",
-                    "content": system_prompt
-                },
-                {
-                    "role": "user",
-                    "content": user_prompt
-                }
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
             ],
             "temperature": 0.7,
-            "max_tokens": 600,
-            "return_citations": False,
-            "return_images": False
+            "max_tokens": 800
         }
         
-        # Call Perplexity API
         response = requests.post(
-            PERPLEXITY_API_URL,
+            OPENROUTER_API_URL,
             headers=headers,
             json=payload,
             timeout=30
         )
         
+        print(f"📊 Response status: {response.status_code}")
+        
         if response.status_code != 200:
-            raise Exception(f"Perplexity API error: {response.status_code} - {response.text}")
+            print(f"❌ Full error response: {response.text}")
+            raise Exception(f"OpenRouter API error: {response.status_code}")
         
-        print(f"✅ Perplexity API responded successfully!")
-        
-        # Parse response
         response_data = response.json()
+        
+        if 'choices' not in response_data or len(response_data['choices']) == 0:
+            raise Exception("No choices in API response")
+        
         response_text = response_data['choices'][0]['message']['content'].strip()
         
-        print(f"📝 AI Generated: {response_text[:100]}...")
+        # Clean up response
+        if '```json' in response_text:
+            response_text = response_text.split('```json')[1].split('```')[0].strip()
+        elif '```' in response_text:
+            response_text = response_text.split('```')[1].split('```')[0].strip()
         
-        # Clean up response if it has markdown code blocks
-        if response_text.startswith('```'):
-            response_text = response_text.split('```')[1]
-            if response_text.startswith('json'):
-                response_text = response_text[4:]
-            response_text = response_text.strip()
+        response_text = response_text.strip()
         
         question_data = json.loads(response_text)
         
@@ -200,28 +293,31 @@ Important:
         if not all(key in question_data for key in ['question', 'options']):
             raise ValueError("Invalid question structure from AI")
         
-        # Ensure options have correct structure
         if len(question_data['options']) < 4:
             raise ValueError("Not enough options generated")
+        
+        if 'type' not in question_data:
+            question_data['type'] = 'scale'
+        
+        print(f"✅ Question generated successfully!")
         
         return question_data
         
     except json.JSONDecodeError as e:
         print(f"❌ JSON parsing error: {e}")
-        print(f"Response was: {response_text if 'response_text' in locals() else 'No response'}")
         return generate_fallback_question(question_number, conversation_history)
     except requests.exceptions.RequestException as e:
         print(f"❌ Network error: {e}")
         return generate_fallback_question(question_number, conversation_history)
     except Exception as e:
         print(f"❌ Error generating AI question: {e}")
+        import traceback
+        print(f"Full traceback: {traceback.format_exc()}")
         return generate_fallback_question(question_number, conversation_history)
 
 
 def generate_fallback_question(question_number, conversation_history):
-    """
-    Generate a fallback question if AI fails
-    """
+    """Generate a fallback question if AI fails"""
     print(f"⚠️ Using fallback question {question_number}")
     
     fallback_questions = [
@@ -287,10 +383,36 @@ def generate_fallback_question(question_number, conversation_history):
                 {"value": 30, "text": "😪 Poor sleep quality or difficulty falling asleep"},
                 {"value": 40, "text": "😵 Severe insomnia or constant exhaustion"}
             ]
+        },
+        {
+            "question": "How often do racing thoughts or worries keep you from focusing?",
+            "options": [
+                {"value": 10, "text": "🧘 I maintain focus easily"},
+                {"value": 20, "text": "💭 Occasionally distracted by worries"},
+                {"value": 30, "text": "😟 Frequently interrupted by anxious thoughts"},
+                {"value": 40, "text": "🌪️ Constantly overwhelmed by racing thoughts"}
+            ]
+        },
+        {
+            "question": "How would you describe your mood over the past week?",
+            "options": [
+                {"value": 10, "text": "😊 Generally positive and upbeat"},
+                {"value": 20, "text": "😐 Neutral with ups and downs"},
+                {"value": 30, "text": "😔 More down than usual"},
+                {"value": 40, "text": "😢 Persistently low or hopeless"}
+            ]
+        },
+        {
+            "question": "How comfortable are you reaching out for support when needed?",
+            "options": [
+                {"value": 10, "text": "🤗 Very comfortable asking for help"},
+                {"value": 20, "text": "👥 Somewhat comfortable with trusted people"},
+                {"value": 30, "text": "😬 Difficult but I try"},
+                {"value": 40, "text": "🚫 Unable to ask for help"}
+            ]
         }
     ]
     
-    # Select based on question number to ensure variety
     index = (question_number - 1) % len(fallback_questions)
     question = fallback_questions[index]
     
@@ -301,33 +423,54 @@ def generate_fallback_question(question_number, conversation_history):
         "follow_up_areas": []
     }
 
+# @csrf_exempt  # Or use Django's CSRF middleware properly
+# @require_http_methods(["POST"])
+# def submit_assessment(request):
+#     try:
+#         data = json.loads(request.body)
+#         pincode = data.get('pincode')
+#         score = data.get('score')
+#         max_score = data.get('max_score')
+#         fingerprint = data.get('fingerprint')
+#         conversation_history = data.get('conversation_history', [])
+#         initial_user_input = data.get('initial_user_input')
+        
+#         # Store in database
+#         # Calculate stress level for area
+#         # Return response
+        
+#         return JsonResponse({
+#             'success': True,
+#             'pincode': pincode,
+#             'total_assessments': 150,  # From database
+#             'stress_level': 'Moderate'  # Calculate from area data
+#         })
+#     except Exception as e:
+#         return JsonResponse({'error': str(e)}, status=500)
 
-# For testing purposes
+# Test endpoint
 @csrf_exempt
 @require_http_methods(["GET"])
-def test_perplexity_connection(request):
-    """
-    Test endpoint to verify Perplexity API is working
-    """
+def test_openrouter_connection(request):
+    """Test endpoint to verify OpenRouter API is working"""
     try:
         headers = {
-            "Authorization": f"Bearer {PERPLEXITY_API_KEY}",
-            "Content-Type": "application/json"
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "http://localhost:8000",
+            "X-Title": "Test Connection"
         }
         
         payload = {
-            "model": "sonar-pro",
+            "model": "openai/gpt-oss-20b:free",
             "messages": [
-                {
-                    "role": "user",
-                    "content": "Say 'Perplexity AI connection successful!' in exactly those words."
-                }
+                {"role": "user", "content": "Say 'OpenRouter connection successful!' in exactly those words."}
             ],
             "max_tokens": 50
         }
         
         response = requests.post(
-            PERPLEXITY_API_URL,
+            OPENROUTER_API_URL,
             headers=headers,
             json=payload,
             timeout=10
@@ -341,7 +484,8 @@ def test_perplexity_connection(request):
                 'success': True,
                 'message': message,
                 'api_working': True,
-                'status_code': response.status_code
+                'status_code': response.status_code,
+                'model': 'openai/gpt-oss-20b:free'
             })
         else:
             return JsonResponse({
@@ -352,37 +496,10 @@ def test_perplexity_connection(request):
             }, status=response.status_code)
             
     except Exception as e:
+        import traceback
         return JsonResponse({
             'success': False,
             'error': str(e),
+            'traceback': traceback.format_exc(),
             'api_working': False
         }, status=500)
-
-
-# Alternative: Use Perplexity with online search capability
-def generate_ai_question_with_search(context, question_number, total_questions, conversation_history):
-    """
-    Alternative implementation that uses Perplexity's online search capability
-    This can provide more up-to-date mental health guidance
-    """
-    
-    payload = {
-        "model": "sonar-pro",  # Online model with search
-        "messages": [
-            {
-                "role": "system",
-                "content": "You are a mental health assessment assistant with access to latest research."
-            },
-            {
-                "role": "user",
-                "content": f"Generate a personalized mental health question based on: {context}"
-            }
-        ],
-        "temperature": 0.7,
-        "max_tokens": 600,
-        "return_citations": True,  # Get sources for mental health info
-        "search_domain_filter": ["who.int", "nimh.nih.gov", "apa.org"]  # Trusted sources only
-    }
-    
-    # Rest of implementation similar to main function
-    pass
