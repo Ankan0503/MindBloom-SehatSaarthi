@@ -1,8 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from signup.views import *
-from doctors.views import *
-from django.conf.urls.static import static
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -12,4 +10,8 @@ urlpatterns = [
     path('', include('assessment.urls')),
     path('',include('stressmap.urls')),
     path('',include('AssessQues.urls')),
+    path('googled40d208fd0e71300.html', 
+         TemplateView.as_view(
+             template_name='googled40d208fd0e71300.html', 
+             content_type='text/html')),
 ]
