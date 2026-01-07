@@ -4,6 +4,10 @@
 - **MindBloom** is a holistic mental health tracking and support platform designed to empower individuals in their journey toward better emotional well-being. By combining self-reflection tools with accessible guidance, we aim to bridge the gap between daily stress management and professional mental health support.
 - **SehatSaarthi** serves as the physical health companion. It acts as a guide to bridge the connection between physical symptoms and overall health, ensuring users maintain the physical stamina required for mental well-being.
 
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge&logo=render&logoColor=white)](https://mindbloom-0nly.onrender.com/)
+
+> **⚠️ Note on Loading Time:** > Our project is hosted on a free instance which "spins down" after 15 minutes of inactivity. When you click the link above, **please allow approximately 1 minute for the server to start up.** We appreciate your patience!
+
 ---
 
 ## 🎯 Our Aim
