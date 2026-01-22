@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class AssessmentConfig(AppConfig):
+class GeoAnalyticsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'assessment'
+    name = 'geo_analytics'

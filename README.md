@@ -124,38 +124,76 @@ Bridging the gap between mental and physical health, this module offers practica
 - **Frontend:** HTML, CSS, JavaScript
 - **Backend:** Django (Python)
 - **Database:** PostgreSQL, PostGIS
-- **Hosting:** Render
+- **Hosting:** Render, Docker
 
 ---
 
 ## 💻 Installation Guide
 
-Follow these steps to run **MindBloom-SehatSaarthi** locally on your machine.
+You can run **MindBloom-SehatSaarthi** locally using either **Docker** (Recommended) or a manual Python setup.
 
-### Prerequisites
-- Python (v3.10 or higher) installed.
-- Git installed.
-- GDAL Setup
-  This project uses **GeoDjango** for the StressMap feature. You must install the GDAL library binaries for your operating system before installing Python requirements.
-
-  **For Windows Only:**
-    1. Download and install [OSGeo4W](https://trac.osgeo.org/osgeo4w/) (Select "Express Web-GIS Install").
-    2. After installation, locate the path to `gdalxxx.dll` (usually in `C:\OSGeo4W\bin\gdalxxx.dll` or `C:\Users\YourUser\AppData\Local\Programs\OSGeo4W\bin\gdalxxx.dll`). It will be used in `.env` file.
-
-### Steps
+### Option 1: Run with Docker (Recommended)
+This is the easiest way to run the project, as it handles all dependencies (including GDAL) for you.
 
 1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/Ankan0503/MindBloom-SehatSaarthi.git
+   cd MindBloom-SehatSaarthi
+   ```
+
+2. **Configure Environment Variables**
+   Create a `.env` file in the project root:
+   ```env
+   SECRET_KEY=your_secret_key
+   DEBUG=True
+
+   # Database Configuration (PostgreSQL + PostGIS required)
+   DATABASE_NAME=your_db
+   DATABASE_USER=your_user
+   DATABASE_PASSWORD=your_password
+   DATABASE_HOST=localhost
+   DATABASE_PORT=5432
+
+   ALLOWED_HOSTS=localhost,127.0.0.1
+
+   # AI Configuration
+   GEMINI_API_KEY=your_gemini_api_key
+
+   # Note: GDAL paths are NOT needed for Docker
+   ```
+
+3. **Build and Run**
+   ```bash
+   docker build -t mindbloom .
+   docker run -p 8000:8000 mindbloom
+   ```
+   
+4. **Access the Website**
+   Open `http://localhost:8000` in your browser.
+
+---
+
+### Option 2: Manual Python Installation
+
+1. **Prerequisites**
+   - Python (v3.10 or higher)
+   - Git
+   - **GDAL Setup (Critical for StressMap):**
+     - **Windows:** Download [OSGeo4W](https://trac.osgeo.org/osgeo4w/) and locate `gdalxxx.dll`.
+     - **Linux/Mac:** Install `gdal-bin` and `libgdal-dev` via your package manager (e.g., `sudo apt-get install gdal-bin`).
+
+2. **Clone the Repository**
    Open your terminal and run:
    ```bash
    git clone https://github.com/Ankan0503/MindBloom-SehatSaarthi.git
    ```
    
-2. **Navigate to the Project Directory**
+3. **Navigate to the Project Directory**
    ```bash
    cd MindBloom-SehatSaarthi
    ```
    
-3. **Create a Virtual Environment (Optional but Recommended)**
+4. **Create a Virtual Environment (Optional but Recommended)**
    #### For Windows
    ```bash
    python -m venv venv
@@ -167,11 +205,11 @@ Follow these steps to run **MindBloom-SehatSaarthi** locally on your machine.
    python3 -m venv venv
    source venv/bin/activate
    
-4. **Install Dependencies:** Install the required Python packages listed in `requirements.txt`:
+5. **Install Dependencies:** Install the required Python packages listed in `requirements.txt`:
    ```bash
     pip install -r requirements.txt
 
-5. **Configure Environment Variables**
+6. **Configure Environment Variables**
 
    Create a file named `.env` in the project root directory (same level as `manage.py`). Add your PostgreSQL database credentials (whether local or cloud) and secret key:
      ```env
@@ -182,10 +220,13 @@ Follow these steps to run **MindBloom-SehatSaarthi** locally on your machine.
      DATABASE_NAME=your_database_name
      DATABASE_USER=your_database_user
      DATABASE_PASSWORD=your_database_password
-     DATABASE_HOST=localhost           # Use 'localhost' for local, or the endpoint URL for cloud
+     DATABASE_HOST=host.docker.internal
      DATABASE_PORT=5432                # Default PostgreSQL port
    
      ALLOWED_HOSTS=localhost,127.0.0.1
+
+     # AI Configuration
+     GEMINI_API_KEY=your_gemini_api_key
 
      # GDAL Configuration (WINDOWS ONLY)
      GDAL_LIBRARY_PATH=C:\path\to\your\gdal311.dll 
@@ -196,24 +237,24 @@ Follow these steps to run **MindBloom-SehatSaarthi** locally on your machine.
    python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
    ```
 
-6. **Collect Static Files**
+7. **Collect Static Files**
 
    Gather all static files (CSS, JavaScript, Images) into the `staticfiles` directory to ensure the UI loads correctly:
    ```bash
-   python manage.py collecstatic
+   python manage.py collectstatic
    ```
 
-7. **Apply Database Migrations**
+8. **Apply Database Migrations**
    ```bash
    python manage.py migrate
    ```
 
-8. **Run the Development Server**
+9. **Run the Development Server**
    ```bash
    python manage.py runserver
    ```
 
-9. **Access the Website:** Open your browser and go to: `http://127.0.0.1:8000/`
+10. **Access the Website:** Open your browser and go to: `http://127.0.0.1:8000/`
 
 ---
 
@@ -253,4 +294,3 @@ Feel free to contact us!
 <p align="center">
   <b>🌟 If you like this project, please give it a star on GitHub! 🌟</b>
 </p>
-   

@@ -32,6 +32,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 7. Copy the project files
 COPY . .
 
-# 8. Expose port 8080 and run the server
-EXPOSE 8080
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "dj_backend.wsgi:application"]
+# 8. Collect all static files into the STATIC_ROOT folder
+RUN python manage.py collectstatic --noinput
+
+# 10. Expose port 8080 and run the server
+EXPOSE 8000
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "dj_backend.wsgi:application"]

@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from assessment.models import PostalBoundaries, PincodeStats
+from geo_analytics.models import PostalBoundaries, PincodeStats
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 import json

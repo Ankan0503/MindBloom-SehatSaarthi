@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG')
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 ALLOWED_ADMIN_IPS = os.getenv('ALLOWED_ADMIN_IPS', '').split(',')
@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'signup.apps.SignupConfig',
     'hospital.apps.HospitalConfig',
     'doctors.apps.DoctorsConfig',
-    'assessment.apps.AssessmentConfig',
+    'geo_analytics',
     'django.contrib.gis',
     'stressmap.apps.StressmapConfig',
 ]

@@ -15,7 +15,7 @@ class PostalBoundaries(models.Model):
 
     class Meta:
         managed = False
-        app_label = 'assessment'
+        app_label = 'geo_analytics'
         db_table = 'postal_boundaries'
         verbose_name = 'Postal Boundary'
         verbose_name_plural = 'Postal Boundaries'
@@ -36,7 +36,8 @@ class AssessmentResponse(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
     
     class Meta:
-        app_label = 'assessment'
+        app_label = 'geo_analytics'
+        db_table = 'assessment_assessmentresponse'
         ordering = ['-timestamp']
         indexes = [
             models.Index(fields=['pincode', 'timestamp']),
@@ -77,7 +78,8 @@ class PincodeStats(models.Model):
     concerning_count = models.IntegerField(default=0)
     
     class Meta:
-        app_label = 'assessment'
+        app_label = 'geo_analytics'
+        db_table = 'assessment_pincodestats'
         verbose_name_plural = "Pincode Statistics"
     
     def __str__(self):

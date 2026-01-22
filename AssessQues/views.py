@@ -1,22 +1,26 @@
-# views.py - Enhanced Django view with text input support
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import json
 import requests
 import os
+from dotenv import load_dotenv
 
-# OpenRouter API Configuration
-OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY')
-OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
+load_dotenv()
+
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+GEMINI_MODEL = "gemini-3-pro-preview"  # Correct model name
+GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
+
+MAX_CHAR_INITIAL = 1000
+MAX_CHAR_ADDITIONAL = 500
+MIN_CHAR_REQUIRED = 10
+
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def generate_question(request):
-    """
-    Generate personalized mental health assessment questions using OpenRouter
-    with support for initial user input and additional text responses
-    """
+    """Generate personalized mental health assessment questions"""
     try:
         data = json.loads(request.body)
         conversation_history = data.get('conversation_history', [])
@@ -25,14 +29,12 @@ def generate_question(request):
         initial_user_input = data.get('initial_user_input', None)
         user_has_skipped = data.get('user_has_skipped', False)
         
-        # Build context from previous answers
         context = build_conversation_context(
             conversation_history, 
             initial_user_input, 
             user_has_skipped
         )
         
-        # Generate question using OpenRouter AI
         question_data = generate_ai_question(
             context, 
             question_number, 
@@ -57,19 +59,272 @@ def generate_question(request):
         }, status=500)
 
 
-def build_conversation_context(conversation_history, initial_user_input=None, user_has_skipped=False):
+@csrf_exempt
+@require_http_methods(["POST"])
+def grade_response(request):
     """
-    Build enhanced conversation context including initial user input and text responses
+    Grade user's text response using Gemini AI
+    Returns a score between 1-50 based on mental health indicators
     """
+    try:
+        data = json.loads(request.body)
+        
+        question_text = data.get('question_text', '')
+        selected_option = data.get('selected_option', None)
+        selected_option_text = data.get('selected_option_text', '')
+        user_text_input = data.get('user_text_input', '')
+        initial_user_input = data.get('initial_user_input', '')
+        conversation_history = data.get('conversation_history', [])
+        
+        # Grade the response
+        grade_result = grade_with_gemini(
+            question_text=question_text,
+            selected_option=selected_option,
+            selected_option_text=selected_option_text,
+            user_text_input=user_text_input,
+            initial_user_input=initial_user_input,
+            conversation_history=conversation_history
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'score': grade_result['score'],
+            'reasoning': grade_result['reasoning'],
+            'severity_level': grade_result['severity_level']
+        })
+        
+    except Exception as e:
+        print(f"Error in grade_response: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        
+        # Return fallback score if AI grading fails
+        fallback_score = data.get('selected_option', 25)
+        return JsonResponse({
+            'success': True,
+            'score': fallback_score,
+            'reasoning': 'Fallback scoring used',
+            'severity_level': 'moderate'
+        })
+
+
+def grade_with_gemini(question_text, selected_option, selected_option_text, 
+                      user_text_input, initial_user_input, conversation_history):
+    """
+    Use Gemini AI to grade mental health response
+    Returns score between 1-50
+    """
+    
+    # Build context for grading
     context_parts = []
     
-    # Add initial user input if provided
+    if initial_user_input:
+        context_parts.append(f"User's initial description: {initial_user_input[:300]}")
+    
+    if conversation_history:
+        recent_context = "\n".join([
+            f"Q{e['question_number']}: {e.get('question_text', '')[:100]} - "
+            f"Response: {e.get('selected_option_text', 'N/A')}"
+            for e in conversation_history[-3:]  # Last 3 questions
+        ])
+        context_parts.append(f"Recent conversation:\n{recent_context}")
+    
+    context = "\n\n".join(context_parts) if context_parts else "No prior context"
+    
+    # Build the grading prompt
+    system_prompt = """You are a mental health assessment grading expert. Your task is to assign a score between 1-50 that reflects the severity of mental health distress based on the user's response.
+
+SCORING SCALE (1-50):
+- 1-12: Minimal distress, healthy coping, positive mental state
+- 13-25: Mild to moderate stress, manageable with self-care
+- 26-37: Significant distress, may need professional support
+- 38-50: Severe distress, urgent professional help recommended
+
+GRADING FACTORS:
+1. Severity of symptoms described
+2. Impact on daily functioning
+3. Duration and frequency of issues
+4. Presence of crisis indicators (self-harm thoughts, hopelessness)
+5. Coping mechanisms mentioned
+6. Support system availability
+7. Physical symptoms mentioned
+8. Sleep, appetite, energy disturbances
+
+IMPORTANT:
+- If ONLY an option is selected (no text), use the predefined score (10, 20, 30, or 40) but scale it to 1-50 range
+- If text is provided WITH an option, consider BOTH for comprehensive assessment
+- If ONLY text is provided (no option), grade entirely based on text content
+- Look for red flags: suicidal ideation, severe isolation, inability to function
+- Consider context from previous responses if available
+
+You must respond with ONLY valid JSON in this exact format:
+{
+  "score": 25,
+  "reasoning": "Brief explanation of the score",
+  "severity_level": "mild|moderate|significant|severe"
+}"""
+
+    # Prepare response summary
+    response_summary = []
+    
+    if selected_option:
+        response_summary.append(f"Selected option: '{selected_option_text}' (base severity: {selected_option}/40)")
+    
+    if user_text_input:
+        response_summary.append(f"User's written response: \"{user_text_input}\"")
+    
+    if not selected_option and not user_text_input:
+        response_summary.append("No response provided")
+    
+    user_prompt = f"""Grade the following mental health assessment response:
+
+QUESTION: {question_text}
+
+USER'S RESPONSE:
+{chr(10).join(response_summary)}
+
+CONTEXT FROM ASSESSMENT:
+{context}
+
+Provide a score between 1-50 that accurately reflects the mental health distress level. Return ONLY the JSON object."""
+
+    try:
+        print(f"🤖 Calling Gemini AI for grading...")
+        
+        headers = {
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "contents": [{
+                "parts": [{
+                    "text": f"{system_prompt}\n\n{user_prompt}"
+                }]
+            }],
+            "generationConfig": {
+                "temperature": 0.3,
+                "topK": 40,
+                "topP": 0.95,
+                "maxOutputTokens": 1024,
+                "responseMimeType": "application/json"
+            }
+        }
+        
+        url = f"{GEMINI_API_URL}?key={GEMINI_API_KEY}"
+        
+        response = requests.post(
+            url,
+            headers=headers,
+            json=payload,
+            timeout=15
+        )
+        
+        print(f"📊 Gemini response status: {response.status_code}")
+        
+        if response.status_code != 200:
+            print(f"❌ Gemini error: {response.text}")
+            raise Exception(f"Gemini API error: {response.status_code}")
+        
+        response_data = response.json()
+        
+        if 'candidates' not in response_data or len(response_data['candidates']) == 0:
+            raise Exception("No candidates in Gemini response")
+        
+        candidate = response_data['candidates'][0]
+        finish_reason = candidate.get('finishReason', 'UNKNOWN')
+
+        # Check for any finish reason that isn't STOP
+        # Or if content is missing regardless of finish reason
+        content = candidate.get('content', {})
+        
+        if 'parts' not in content or not content['parts']:
+             print(f"⚠️ Grading content missing. Finish Reason: {finish_reason}")
+             print(f"Full candidate: {candidate}")
+             return generate_fallback_grade(
+                 selected_option, 
+                 user_text_input, 
+                 error_details=f"No content generated (Reason: {finish_reason})"
+             )
+
+        response_text = content['parts'][0]['text'].strip()
+        
+        # Robust Clean up response
+        # Find first '{' and last '}'
+        start_idx = response_text.find('{')
+        end_idx = response_text.rfind('}')
+        
+        if start_idx != -1 and end_idx != -1:
+            response_text = response_text[start_idx:end_idx+1]
+        
+        grade_data = json.loads(response_text)
+        
+        # Validate score range
+        score = grade_data.get('score', 25)
+        score = max(1, min(50, score))  # Ensure between 1-50
+        
+        grade_data['score'] = score
+        
+        print(f"✅ Gemini grading complete: {score}/50 ({grade_data.get('severity_level', 'moderate')})")
+        
+        return grade_data
+        
+    except json.JSONDecodeError as e:
+        print(f"❌ JSON parsing error: {e}")
+        print(f"Response text: {response_text}")
+        return generate_fallback_grade(selected_option, user_text_input, error_details=f"JSON Error: {str(e)}")
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Network error: {e}")
+        return generate_fallback_grade(selected_option, user_text_input, error_details=f"Network Error: {str(e)}")
+    except Exception as e:
+        print(f"❌ Error in Gemini grading: {e}")
+        import traceback
+        print(traceback.format_exc())
+        return generate_fallback_grade(selected_option, user_text_input, error_details=f"General Error: {str(e)}")
+
+
+def generate_fallback_grade(selected_option, user_text_input, error_details=None):
+    """Generate fallback grade if AI grading fails"""
+    print("⚠️ Using fallback grading")
+    
+    if selected_option:
+        # Scale 10/20/30/40 to 1-50 range
+        # 10 -> 12, 20 -> 25, 30 -> 37, 40 -> 50
+        score_mapping = {
+            10: 12,
+            20: 25,
+            30: 37,
+            40: 50
+        }
+        score = score_mapping.get(selected_option, 25)
+        severity = 'mild' if score <= 12 else 'moderate' if score <= 25 else 'significant' if score <= 37 else 'severe'
+    elif user_text_input:
+        # Text only - assume moderate
+        score = 25
+        severity = 'moderate'
+    else:
+        score = 25
+        severity = 'moderate'
+    
+    reasoning = 'Fallback scoring used due to AI grading unavailability'
+    if error_details:
+        reasoning += f" [DEBUG ERROR: {error_details}]"
+
+    return {
+        'score': score,
+        'reasoning': reasoning,
+        'severity_level': severity
+    }
+
+
+def build_conversation_context(conversation_history, initial_user_input=None, user_has_skipped=False):
+    """Build conversation context with enhanced grading information"""
+    context_parts = []
+    
     if initial_user_input and not user_has_skipped:
         context_parts.append(
             f"📝 INITIAL USER INPUT (Question 0 - User's self-description):\n"
             f"\"{initial_user_input}\"\n"
-            f"[This is what the user wrote about their mental health before starting. "
-            f"Use this as PRIMARY CONTEXT for all questions. Reference specific concerns they mentioned.]"
+            f"[Use this as PRIMARY CONTEXT for all questions. Reference specific concerns they mentioned.]"
         )
     
     if not conversation_history:
@@ -86,82 +341,70 @@ def build_conversation_context(conversation_history, initial_user_input=None, us
         user_text_input = entry.get('user_text_input', '')
         question_text = entry.get('question_text', '')
         question_number = entry.get('question_number')
-        has_both = entry.get('has_both', False)
+        ai_graded_score = entry.get('ai_graded_score', None)  # NEW: AI-graded score
         
-        # Build response summary
         response_summary = []
         
         if selected_option:
-            response_summary.append(f"Selected option: '{selected_text}' (stress level: {selected_option}/40)")
-            
-            # Track high stress responses
-            if selected_option >= 30:
-                high_stress_areas.append({
-                    'question': question_number,
-                    'question_text': question_text,
-                    'response': selected_text,
-                    'severity': selected_option
-                })
+            response_summary.append(f"Selected option: '{selected_text}' (base: {selected_option}/40)")
         
         if user_text_input:
             response_summary.append(f"User wrote: \"{user_text_input}\"")
+        
+        if ai_graded_score:
+            response_summary.append(f"AI-graded score: {ai_graded_score}/50")
             
-            # Extract key insights from text
+            if ai_graded_score >= 37:
+                high_stress_areas.append({
+                    'question': question_number,
+                    'question_text': question_text,
+                    'response': selected_text or user_text_input[:100],
+                    'severity': ai_graded_score
+                })
+        
+        if user_text_input:
             key_text_insights.append({
                 'question': question_number,
                 'text': user_text_input,
                 'context': question_text
             })
         
-        if not selected_option and user_text_input:
-            response_summary.append("[User provided only text, no option selected]")
-        
-        # Combine into context entry
         context_entry = (
             f"Q{question_number}: {question_text}\n"
             f"  Response: {' | '.join(response_summary)}"
         )
         
-        if has_both:
-            context_entry += "\n  [User provided BOTH option AND detailed text - this is particularly informative]"
-        
         context_parts.append(context_entry)
     
     context = "\n\n".join(context_parts)
     
-    # Add high stress areas summary
     if high_stress_areas:
         focus_areas = "\n".join([
             f"  • Q{area['question']}: {area['question_text']}\n"
-            f"    High stress: {area['response']} (severity: {area['severity']}/40)"
+            f"    High stress: {area['response']} (severity: {area['severity']}/50)"
             for area in high_stress_areas
         ])
         context += f"\n\n🚨 HIGH STRESS AREAS REQUIRING FOLLOW-UP:\n{focus_areas}"
     
-    # Add key text insights summary
     if key_text_insights:
         insights = "\n".join([
             f"  • Q{insight['question']}: \"{insight['text'][:100]}{'...' if len(insight['text']) > 100 else ''}\""
             for insight in key_text_insights
         ])
-        context += f"\n\n💭 KEY USER-PROVIDED INSIGHTS (reference these directly):\n{insights}"
+        context += f"\n\n💭 KEY USER-PROVIDED INSIGHTS:\n{insights}"
     
     return context
 
 
 def generate_ai_question(context, question_number, total_questions, conversation_history, initial_user_input=None):
-    """
-    Use OpenRouter AI to generate personalized next question
-    Enhanced to leverage user's text input
-    """
+    """Generate AI question using Gemini API"""
     
-    # Determine assessment phase
     if question_number <= 3:
         phase = "initial_broad_assessment"
         if initial_user_input:
             instruction = (
-                "The user already described their situation in detail. Ask a focused question "
-                "that builds DIRECTLY on specific concerns they mentioned. Reference their exact words."
+                "The user already described their situation. Ask a focused question "
+                "that builds on specific concerns they mentioned."
             )
         else:
             instruction = "Ask a general question to understand their overall mental state."
@@ -169,48 +412,36 @@ def generate_ai_question(context, question_number, total_questions, conversation
         phase = "deep_dive"
         instruction = (
             "Dive deeper into areas showing stress. If they provided text responses, "
-            "acknowledge and build on what they shared. Use their own words to show you're listening."
+            "build on what they shared."
         )
     else:
         phase = "wrap_up"
         instruction = (
-            "Focus on coping mechanisms, support systems, or important aspects not yet covered. "
-            "If they've been detailed in text responses, acknowledge their openness."
+            "Focus on coping mechanisms, support systems, or important uncovered aspects."
         )
     
-    system_prompt = """You are a compassionate mental health assessment assistant. Your role is to generate personalized, empathetic questions.
+    system_prompt = """You are a compassionate mental health assessment assistant generating personalized questions.
 
 CRITICAL INSTRUCTIONS:
-- When users provide text responses, READ THEM CAREFULLY and reference specific details
-- Build each question naturally from what they've shared, using their own words when appropriate
-- If they mentioned something like "work deadlines", ask specifically about work stress
-- If they wrote about "not sleeping", focus on sleep patterns
-- Make them feel HEARD - show you're paying attention to their written responses
+- Reference user's specific details from their text responses
+- Build naturally on previous responses
 - Be warm, non-judgmental, and supportive
 - Ask one clear question at a time
+- Focus on: sleep, work stress, relationships, self-care, emotions, physical symptoms
 
-Guidelines:
-- Build naturally on previous responses - both option selections AND text input
-- Focus on actionable areas: sleep, work stress, relationships, self-care, emotions, physical symptoms
-- Match the assessment phase (broad → deep dive → wrap-up)
-- Questions should feel conversational, like a caring professional
+You must respond with ONLY valid JSON, no markdown formatting."""
 
-You must respond with ONLY valid JSON, nothing else."""
-
-    # Build user prompt with emphasis on text responses
     text_emphasis = ""
     if any(entry.get('user_text_input') for entry in conversation_history):
         text_emphasis = """
-⚠️ IMPORTANT: The user has provided detailed text responses. You MUST:
-1. Reference their specific words and concerns
+⚠️ IMPORTANT: The user has provided detailed text. You MUST:
+1. Reference their specific words
 2. Build directly on what they shared
-3. Show you're listening by acknowledging details they mentioned
-4. Make the conversation feel personalized, not generic
+3. Show you're listening
+4. Personalize the conversation
 """
 
-    user_prompt = f"""Generate the next question for a mental wellness assessment.
-
-Assessment Progress: Question {question_number} of {total_questions}
+    user_prompt = f"""Generate question {question_number} of {total_questions}.
 Phase: {phase}
 
 {text_emphasis}
@@ -220,91 +451,121 @@ Previous Conversation:
 
 Instructions: {instruction}
 
-Return ONLY a valid JSON object (no markdown, no explanation):
+Return ONLY valid JSON:
 {{
-    "question": "Your empathetic, personalized question here",
+    "question": "Your empathetic question",
     "type": "scale",
     "options": [
-        {{"value": 10, "text": "😊 [Positive/low stress response]"}},
-        {{"value": 20, "text": "😌 [Moderate/manageable response]"}},
-        {{"value": 30, "text": "😕 [High stress/concerning response]"}},
-        {{"value": 40, "text": "😔 [Severe/overwhelming response]"}}
+        {{"value": 10, "text": "😊 [Positive/low stress]"}},
+        {{"value": 20, "text": "😌 [Moderate/manageable]"}},
+        {{"value": 30, "text": "😕 [High stress/concerning]"}},
+        {{"value": 40, "text": "😰 [Severe/overwhelming]"}}
     ],
     "follow_up_areas": ["area1", "area2"]
-}}
-
-Important:
-- Use emojis that match sentiment (😊😌😕😔)
-- Make options specific to the question
-- Progress logically from low stress (10) to high stress (40)
-- Return ONLY the JSON object"""
+}}"""
 
     try:
-        print(f"🤖 Calling OpenRouter API for question {question_number}...")
+        print(f"🤖 Calling Gemini API for question {question_number}...")
         
+        # ✅ CORRECT Gemini API format
         headers = {
-            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-            "Content-Type": "application/json",
-            "HTTP-Referer": "http://localhost:8000",
-            "X-Title": "Mental Health Assessment"
+            "Content-Type": "application/json"
         }
         
+        # ✅ CORRECT Gemini payload structure
         payload = {
-            "model": "openai/gpt-oss-20b:free",
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            "temperature": 0.7,
-            "max_tokens": 800
+            "contents": [{
+                "parts": [{
+                    "text": f"{system_prompt}\n\n{user_prompt}"
+                }]
+            }],
+            "generationConfig": {
+                "temperature": 0.7,
+                "topK": 40,
+                "topP": 0.95,
+                "maxOutputTokens": 2048,
+                "responseMimeType": "application/json"
+            },
+            "safetySettings": [
+                {
+                    "category": "HARM_CATEGORY_HARASSMENT",
+                    "threshold": "BLOCK_NONE"
+                },
+                {
+                    "category": "HARM_CATEGORY_HATE_SPEECH",
+                    "threshold": "BLOCK_NONE"
+                },
+                {
+                    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    "threshold": "BLOCK_NONE"
+                },
+                {
+                    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                    "threshold": "BLOCK_NONE"
+                }
+            ]
         }
+        
+        url = f"{GEMINI_API_URL}?key={GEMINI_API_KEY}"
         
         response = requests.post(
-            OPENROUTER_API_URL,
+            url,
             headers=headers,
             json=payload,
             timeout=30
         )
         
-        print(f"📊 Response status: {response.status_code}")
+        print(f"📊 Gemini response status: {response.status_code}")
         
         if response.status_code != 200:
-            print(f"❌ Full error response: {response.text}")
-            raise Exception(f"OpenRouter API error: {response.status_code}")
+            print(f"❌ Gemini error response: {response.text}")
+            raise Exception(f"Gemini API error: {response.status_code}")
         
         response_data = response.json()
         
-        if 'choices' not in response_data or len(response_data['choices']) == 0:
-            raise Exception("No choices in API response")
+        # Check for valid response
+        if 'candidates' not in response_data or len(response_data['candidates']) == 0:
+            raise Exception("No candidates in Gemini response")
         
-        response_text = response_data['choices'][0]['message']['content'].strip()
+        candidate = response_data['candidates'][0]
         
-        # Clean up response
-        if '```json' in response_text:
-            response_text = response_text.split('```json')[1].split('```')[0].strip()
-        elif '```' in response_text:
-            response_text = response_text.split('```')[1].split('```')[0].strip()
+        # Check if blocked by safety
+        if candidate.get('finishReason') == 'SAFETY':
+            print("⚠️ Response blocked by safety filters, using fallback")
+            return generate_fallback_question(question_number, conversation_history)
         
-        response_text = response_text.strip()
+        # Safer parsing of response structure
+        content = candidate.get('content', {})
+        if 'parts' in content:
+            response_text = content['parts'][0]['text'].strip()
+        else:
+            print(f"⚠️ Unexpected structure in candidate content: {content}")
+            raise KeyError("'parts' not found in content")
+
+        # Robust Clean up response
+        # Find first '{' and last '}'
+        start_idx = response_text.find('{')
+        end_idx = response_text.rfind('}')
+        
+        if start_idx != -1 and end_idx != -1:
+            response_text = response_text[start_idx:end_idx+1]
         
         question_data = json.loads(response_text)
         
         # Validate structure
         if not all(key in question_data for key in ['question', 'options']):
-            raise ValueError("Invalid question structure from AI")
-        
-        if len(question_data['options']) < 4:
-            raise ValueError("Not enough options generated")
+            raise ValueError("Invalid question structure")
         
         if 'type' not in question_data:
             question_data['type'] = 'scale'
         
-        print(f"✅ Question generated successfully!")
+        print(f"✅ Question generated successfully: \"{question_data['question'][:60]}...\"")
         
         return question_data
         
     except json.JSONDecodeError as e:
         print(f"❌ JSON parsing error: {e}")
+        print(f"Response text: {response_text if 'response_text' in locals() else 'N/A'}")
         return generate_fallback_question(question_number, conversation_history)
     except requests.exceptions.RequestException as e:
         print(f"❌ Network error: {e}")
@@ -312,14 +573,12 @@ Important:
     except Exception as e:
         print(f"❌ Error generating AI question: {e}")
         import traceback
-        print(f"Full traceback: {traceback.format_exc()}")
+        print(traceback.format_exc())
         return generate_fallback_question(question_number, conversation_history)
 
 
 def generate_fallback_question(question_number, conversation_history):
-    """Generate a fallback question if AI fails"""
-    print(f"⚠️ Using fallback question {question_number}")
-    
+    """Generate fallback question if AI fails"""
     fallback_questions = [
         {
             "question": "How would you describe your energy levels throughout the day?",
@@ -340,16 +599,16 @@ def generate_fallback_question(question_number, conversation_history):
             ]
         },
         {
-            "question": "How would you rate your ability to relax and unwind?",
+            "question": "How well are you sleeping lately?",
             "options": [
-                {"value": 10, "text": "😌 I relax easily and often"},
-                {"value": 20, "text": "🙂 I can relax with some effort"},
-                {"value": 30, "text": "😕 Struggling to truly relax"},
-                {"value": 40, "text": "😫 Unable to relax at all"}
+                {"value": 10, "text": "😴 Sleeping soundly and refreshed"},
+                {"value": 20, "text": "🌙 Decent with minor interruptions"},
+                {"value": 30, "text": "😪 Poor sleep quality"},
+                {"value": 40, "text": "😵 Severe insomnia"}
             ]
         },
         {
-            "question": "How connected do you feel to the people around you?",
+            "question": "How connected do you feel to people around you?",
             "options": [
                 {"value": 10, "text": "❤️ Very connected and supported"},
                 {"value": 20, "text": "🤝 Moderately connected"},
@@ -358,57 +617,12 @@ def generate_fallback_question(question_number, conversation_history):
             ]
         },
         {
-            "question": "How often do you experience physical tension or discomfort?",
+            "question": "How would you rate your ability to relax?",
             "options": [
-                {"value": 10, "text": "😌 Rarely have physical symptoms"},
-                {"value": 20, "text": "🤕 Occasional tension or headaches"},
-                {"value": 30, "text": "😖 Frequent physical discomfort"},
-                {"value": 40, "text": "😩 Constant pain or tension"}
-            ]
-        },
-        {
-            "question": "How satisfied are you with your work-life balance?",
-            "options": [
-                {"value": 10, "text": "✨ Very balanced and fulfilled"},
-                {"value": 20, "text": "⚖️ Mostly balanced with minor issues"},
-                {"value": 30, "text": "😓 Struggling to find balance"},
-                {"value": 40, "text": "😫 Completely imbalanced and burnt out"}
-            ]
-        },
-        {
-            "question": "How well are you sleeping lately?",
-            "options": [
-                {"value": 10, "text": "😴 Sleeping soundly and waking refreshed"},
-                {"value": 20, "text": "🌙 Decent sleep with minor interruptions"},
-                {"value": 30, "text": "😪 Poor sleep quality or difficulty falling asleep"},
-                {"value": 40, "text": "😵 Severe insomnia or constant exhaustion"}
-            ]
-        },
-        {
-            "question": "How often do racing thoughts or worries keep you from focusing?",
-            "options": [
-                {"value": 10, "text": "🧘 I maintain focus easily"},
-                {"value": 20, "text": "💭 Occasionally distracted by worries"},
-                {"value": 30, "text": "😟 Frequently interrupted by anxious thoughts"},
-                {"value": 40, "text": "🌪️ Constantly overwhelmed by racing thoughts"}
-            ]
-        },
-        {
-            "question": "How would you describe your mood over the past week?",
-            "options": [
-                {"value": 10, "text": "😊 Generally positive and upbeat"},
-                {"value": 20, "text": "😐 Neutral with ups and downs"},
-                {"value": 30, "text": "😔 More down than usual"},
-                {"value": 40, "text": "😢 Persistently low or hopeless"}
-            ]
-        },
-        {
-            "question": "How comfortable are you reaching out for support when needed?",
-            "options": [
-                {"value": 10, "text": "🤗 Very comfortable asking for help"},
-                {"value": 20, "text": "👥 Somewhat comfortable with trusted people"},
-                {"value": 30, "text": "😬 Difficult but I try"},
-                {"value": 40, "text": "🚫 Unable to ask for help"}
+                {"value": 10, "text": "😌 I relax easily"},
+                {"value": 20, "text": "🙂 Can relax with effort"},
+                {"value": 30, "text": "😕 Struggling to relax"},
+                {"value": 40, "text": "😫 Unable to relax"}
             ]
         }
     ]
@@ -423,76 +637,48 @@ def generate_fallback_question(question_number, conversation_history):
         "follow_up_areas": []
     }
 
-# @csrf_exempt  # Or use Django's CSRF middleware properly
-# @require_http_methods(["POST"])
-# def submit_assessment(request):
-#     try:
-#         data = json.loads(request.body)
-#         pincode = data.get('pincode')
-#         score = data.get('score')
-#         max_score = data.get('max_score')
-#         fingerprint = data.get('fingerprint')
-#         conversation_history = data.get('conversation_history', [])
-#         initial_user_input = data.get('initial_user_input')
-        
-#         # Store in database
-#         # Calculate stress level for area
-#         # Return response
-        
-#         return JsonResponse({
-#             'success': True,
-#             'pincode': pincode,
-#             'total_assessments': 150,  # From database
-#             'stress_level': 'Moderate'  # Calculate from area data
-#         })
-#     except Exception as e:
-#         return JsonResponse({'error': str(e)}, status=500)
 
-# Test endpoint
 @csrf_exempt
 @require_http_methods(["GET"])
-def test_openrouter_connection(request):
-    """Test endpoint to verify OpenRouter API is working"""
+def test_gemini_connection(request):
+    """Test Gemini API connection"""
     try:
-        headers = {
-            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-            "Content-Type": "application/json",
-            "HTTP-Referer": "http://localhost:8000",
-            "X-Title": "Test Connection"
-        }
+        if not GEMINI_API_KEY:
+            return JsonResponse({
+                'success': False,
+                'error': 'GEMINI_API_KEY not found in environment variables',
+                'details': 'Please set GEMINI_API_KEY in your .env file'
+            }, status=500)
+
+        headers = {"Content-Type": "application/json"}
         
         payload = {
-            "model": "openai/gpt-oss-20b:free",
-            "messages": [
-                {"role": "user", "content": "Say 'OpenRouter connection successful!' in exactly those words."}
-            ],
-            "max_tokens": 50
+            "contents": [{
+                "parts": [{
+                    "text": "Say 'Gemini connection successful!' in exactly those words."
+                }]
+            }]
         }
         
-        response = requests.post(
-            OPENROUTER_API_URL,
-            headers=headers,
-            json=payload,
-            timeout=10
-        )
+        url = f"{GEMINI_API_URL}?key={GEMINI_API_KEY}"
+        
+        response = requests.post(url, headers=headers, json=payload, timeout=10)
         
         if response.status_code == 200:
             response_data = response.json()
-            message = response_data['choices'][0]['message']['content']
+            message = response_data['candidates'][0]['content']['parts'][0]['text']
             
             return JsonResponse({
                 'success': True,
                 'message': message,
                 'api_working': True,
-                'status_code': response.status_code,
-                'model': 'openai/gpt-oss-20b:free'
+                'model': 'gemini-3-pro-preview'
             })
         else:
             return JsonResponse({
                 'success': False,
-                'error': f"API returned status {response.status_code}",
-                'details': response.text,
-                'api_working': False
+                'error': f"API returned {response.status_code}",
+                'details': response.text
             }, status=response.status_code)
             
     except Exception as e:
@@ -500,6 +686,5 @@ def test_openrouter_connection(request):
         return JsonResponse({
             'success': False,
             'error': str(e),
-            'traceback': traceback.format_exc(),
-            'api_working': False
+            'traceback': traceback.format_exc()
         }, status=500)

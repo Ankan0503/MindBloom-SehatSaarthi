@@ -7,9 +7,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Ignore local virtual environments
-env/
-venv/
+# Ignore local env and venv files
+.env
 .venv/
 
 # Ignore local database files
